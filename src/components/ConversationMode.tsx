@@ -6,7 +6,6 @@ interface Props {
   isListening: boolean
   isThinking: boolean
   transcription: string
-  voiceStatus: string
   voiceError: string | null
   lastReply: string
   onBack: () => void
@@ -18,7 +17,6 @@ export function ConversationMode({
   isListening,
   isThinking,
   transcription,
-  voiceStatus,
   voiceError,
   lastReply,
   onBack,
@@ -89,7 +87,6 @@ export function ConversationMode({
       </header>
 
       <div className="flex-1 flex flex-col items-center justify-center px-6">
-        {/* Orb */}
         <div className="relative mb-8">
           <div className={`absolute -inset-8 rounded-full transition-all duration-700 ${
             isSpeaking
@@ -120,7 +117,6 @@ export function ConversationMode({
           )}
         </div>
 
-        {/* Text area */}
         <div className="w-full max-w-md text-center min-h-[120px]">
           {voiceError ? (
             <div className="px-4 py-3 bg-danger/10 text-danger text-sm rounded-2xl">
@@ -147,7 +143,7 @@ export function ConversationMode({
             </p>
           ) : isListening ? (
             <div>
-              <p className="text-accent font-medium text-sm mb-1">{voiceStatus || 'Parle maintenant...'}</p>
+              <p className="text-accent font-medium text-sm mb-1">Parle maintenant...</p>
               {transcription && (
                 <p className="text-text-primary text-base italic">"{transcription}"</p>
               )}
@@ -158,15 +154,14 @@ export function ConversationMode({
         </div>
       </div>
 
-      {/* Mic button */}
       <div className="flex justify-center pb-10">
         <button
           onClick={onMicToggle}
-          disabled={isSpeaking}
+          disabled={isSpeaking || isThinking}
           className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg ${
             isListening
               ? 'bg-accent text-white shadow-accent/30 scale-110 animate-pulse'
-              : isSpeaking
+              : isSpeaking || isThinking
                 ? 'bg-text-muted/30 text-text-muted cursor-not-allowed'
                 : 'bg-primary text-white shadow-primary/30 hover:scale-105'
           }`}

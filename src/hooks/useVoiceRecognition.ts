@@ -10,13 +10,37 @@ export function useVoiceRecognition(onResult: (text: string) => void) {
   const onResultRef = useRef(onResult)
   onResultRef.current = onResult
 
+  const handleSilence = useCallback(async () => {
+    if (!isRecording() || processingRef.current) return
+    processingRef.current = true
+    setIsListening(false)
+    setStatus('Transcription...')
+
+    try {
+      const text = await stopRecording()
+      if (text.trim()) {
+        console.log('STT result (auto-stop):', text)
+        setTranscript(text)
+        setStatus('Compris !')
+        onResultRef.current(text)
+      } else {
+        setStatus('')
+      }
+    } catch (err) {
+      console.error('STT error:', err)
+      setStatus('')
+    } finally {
+      processingRef.current = false
+    }
+  }, [])
+
   const startListening = useCallback(async () => {
     if (isRecording()) return
     setError(null)
     setStatus('Démarrage du micro...')
 
     try {
-      await startRecording()
+      await startRecording(handleSilence)
       setIsListening(true)
       setTranscript('')
       setStatus('Parle maintenant...')
@@ -26,7 +50,7 @@ export function useVoiceRecognition(onResult: (text: string) => void) {
       setError(msg)
       setStatus('')
     }
-  }, [])
+  }, [handleSilence])
 
   const stopListening = useCallback(async () => {
     if (!isRecording()) {

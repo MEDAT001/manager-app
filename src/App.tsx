@@ -91,7 +91,6 @@ export default function App() {
         isListening={voice.isListening}
         isThinking={isThinking}
         transcription={voice.transcript}
-        voiceStatus={voice.status}
         voiceError={voice.error}
         lastReply={lastReply}
         onBack={handleBackToSelect}

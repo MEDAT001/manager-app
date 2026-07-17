@@ -1,8 +1,21 @@
 let mediaRecorder: MediaRecorder | null = null
 let audioChunks: Blob[] = []
 let currentStream: MediaStream | null = null
+let silenceTimer: ReturnType<typeof setTimeout> | null = null
+let analyser: AnalyserNode | null = null
+let audioContext: AudioContext | null = null
+let silenceCheckInterval: ReturnType<typeof setInterval> | null = null
+
+const SILENCE_THRESHOLD = 15
+const SILENCE_TIMEOUT_MS = 2000
+let onSilenceCallback: (() => void) | null = null
 
 function cleanupStream() {
+  if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null }
+  if (silenceCheckInterval) { clearInterval(silenceCheckInterval); silenceCheckInterval = null }
+  if (audioContext) { audioContext.close().catch(() => {}); audioContext = null }
+  analyser = null
+  onSilenceCallback = null
   if (currentStream) {
     currentStream.getTracks().forEach((t) => t.stop())
     currentStream = null
@@ -11,8 +24,39 @@ function cleanupStream() {
   audioChunks = []
 }
 
-export async function startRecording(): Promise<void> {
+function startSilenceDetection(stream: MediaStream) {
+  audioContext = new AudioContext()
+  const source = audioContext.createMediaStreamSource(stream)
+  analyser = audioContext.createAnalyser()
+  analyser.fftSize = 512
+  source.connect(analyser)
+
+  const dataArray = new Uint8Array(analyser.frequencyBinCount)
+  let hasSpoken = false
+
+  silenceCheckInterval = setInterval(() => {
+    if (!analyser) return
+    analyser.getByteFrequencyData(dataArray)
+    let sum = 0
+    for (let i = 0; i < dataArray.length; i++) sum += dataArray[i]
+    const avg = sum / dataArray.length
+
+    if (avg > SILENCE_THRESHOLD) {
+      hasSpoken = true
+      if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null }
+    } else if (hasSpoken) {
+      if (!silenceTimer) {
+        silenceTimer = setTimeout(() => {
+          if (onSilenceCallback) onSilenceCallback()
+        }, SILENCE_TIMEOUT_MS)
+      }
+    }
+  }, 100)
+}
+
+export async function startRecording(onSilence?: () => void): Promise<void> {
   cleanupStream()
+  onSilenceCallback = onSilence || null
 
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: {
@@ -39,6 +83,7 @@ export async function startRecording(): Promise<void> {
   }
 
   mediaRecorder.start(250)
+  startSilenceDetection(stream)
 }
 
 export async function stopRecording(): Promise<string> {
