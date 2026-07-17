@@ -64,26 +64,31 @@ export function ConversationMode({
 
   return (
     <div className="h-full flex flex-col bg-surface">
-      <header className="flex items-center px-5 py-4 border-b border-border bg-surface-card/80 backdrop-blur-xl">
-        <button
-          onClick={onBack}
-          className="p-2.5 rounded-xl text-text-muted hover:bg-surface-hover hover:text-primary transition-all duration-200 mr-3"
-          aria-label="Retour au choix"
-        >
-          <ArrowLeft size={16} />
-        </button>
-        <div>
-          <span className="font-semibold text-text-primary text-[15px] tracking-tight block leading-tight">
-            Samir
-          </span>
-          <span className={`text-[11px] font-medium flex items-center gap-1 ${
-            isSpeaking ? 'text-primary' : isListening ? 'text-accent' : 'text-mint'
-          }`}>
-            <span className={`w-1.5 h-1.5 rounded-full inline-block ${
-              isSpeaking ? 'bg-primary animate-pulse' : isListening ? 'bg-accent animate-pulse' : 'bg-mint'
-            }`} />
-            {isSpeaking ? 'Samir parle...' : isListening ? 'Écoute...' : isThinking ? 'Réfléchit...' : 'En ligne'}
-          </span>
+      <header className="flex items-center justify-between px-5 py-4 border-b border-border bg-surface-card/80 backdrop-blur-xl">
+        <div className="flex items-center">
+          <button
+            onClick={onBack}
+            className="p-2.5 rounded-xl text-text-muted hover:bg-surface-hover hover:text-primary transition-all duration-200 mr-3"
+            aria-label="Retour au choix"
+          >
+            <ArrowLeft size={16} />
+          </button>
+          <div>
+            <span className="font-semibold text-text-primary text-[15px] tracking-tight block leading-tight">
+              Samir
+            </span>
+            <span className={`text-[11px] font-medium flex items-center gap-1 ${
+              isSpeaking ? 'text-primary' : isListening ? 'text-accent' : 'text-mint'
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full inline-block ${
+                isSpeaking ? 'bg-primary animate-pulse' : isListening ? 'bg-accent animate-pulse' : 'bg-mint'
+              }`} />
+              {isSpeaking ? 'Samir parle...' : isListening ? 'Écoute...' : isThinking ? 'Réfléchit...' : 'En ligne'}
+            </span>
+          </div>
+        </div>
+        <div className="w-8 h-8 rounded-lg overflow-hidden shadow-md">
+          <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
         </div>
       </header>
 
