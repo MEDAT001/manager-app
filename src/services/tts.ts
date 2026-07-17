@@ -2,7 +2,25 @@ import { logger } from '../lib/logger'
 
 const MAX_TEXT_LENGTH = 5000
 
-export async function synthesizeSpeech(text: string): Promise<Blob> {
+let audioContext: AudioContext | null = null
+let currentSource: AudioBufferSourceNode | null = null
+let currentTimeout: ReturnType<typeof setTimeout> | null = null
+
+function getAudioContext(): AudioContext {
+  if (!audioContext || audioContext.state === 'closed') {
+    audioContext = new AudioContext()
+  }
+  if (audioContext.state === 'suspended') {
+    audioContext.resume()
+  }
+  return audioContext
+}
+
+export function initAudioContext(): void {
+  getAudioContext()
+}
+
+export async function synthesizeSpeech(text: string): Promise<ArrayBuffer> {
   const truncated = text.length > MAX_TEXT_LENGTH
     ? text.slice(0, MAX_TEXT_LENGTH) + '...'
     : text
@@ -16,44 +34,52 @@ export async function synthesizeSpeech(text: string): Promise<Blob> {
   })
 
   if (!response.ok) {
+    const errBody = await response.text().catch(() => '')
+    logger.error('TTS failed', response.status, errBody)
     throw new Error(`TTS failed: ${response.status}`)
   }
 
-  return response.blob()
+  return response.arrayBuffer()
 }
-
-let currentAudio: HTMLAudioElement | null = null
 
 export async function speak(text: string): Promise<void> {
   stopSpeaking()
 
-  const blob = await synthesizeSpeech(text)
-  const url = URL.createObjectURL(blob)
+  const arrayBuffer = await synthesizeSpeech(text)
+  const ctx = getAudioContext()
+  const audioBuffer = await ctx.decodeAudioData(arrayBuffer)
 
   return new Promise((resolve, reject) => {
-    const audio = new Audio(url)
-    currentAudio = audio
+    const source = ctx.createBufferSource()
+    source.buffer = audioBuffer
+    source.connect(ctx.destination)
+    currentSource = source
 
-    audio.onended = () => {
-      URL.revokeObjectURL(url)
-      currentAudio = null
+    source.onended = () => {
+      currentSource = null
       resolve()
     }
 
-    audio.onerror = (e) => {
-      URL.revokeObjectURL(url)
-      currentAudio = null
-      reject(e)
+    try {
+      source.start(0)
+    } catch (err) {
+      currentSource = null
+      reject(err)
     }
-
-    audio.play().catch(reject)
   })
 }
 
 export function stopSpeaking(): void {
-  if (currentAudio) {
-    currentAudio.pause()
-    currentAudio.src = ''
-    currentAudio = null
+  if (currentTimeout) {
+    clearTimeout(currentTimeout)
+    currentTimeout = null
+  }
+  if (currentSource) {
+    try {
+      currentSource.stop()
+    } catch {
+      // already stopped
+    }
+    currentSource = null
   }
 }

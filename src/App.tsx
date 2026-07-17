@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react'
-import { RefreshCw, MoreHorizontal } from 'lucide-react'
+import { RefreshCw, MoreHorizontal, Volume2 } from 'lucide-react'
 import { ChatWindow } from './components/ChatWindow'
 import { ChatInput } from './components/ChatInput'
 import { useChat } from './hooks/useChat'
@@ -12,16 +12,17 @@ export default function App() {
   const speakRef = useRef(voiceMode.speakText)
   speakRef.current = voiceMode.speakText
 
-  const enableVoiceRef = useRef(voiceMode.enable)
-  enableVoiceRef.current = voiceMode.enable
+  const voiceModeRef = useRef(voiceMode.isVoiceMode)
+  voiceModeRef.current = voiceMode.isVoiceMode
+
+  const startListeningRef = useRef<() => void>(() => {})
 
   const chat = useChat({
     onReply: voiceMode.isVoiceMode
       ? async (text) => {
           await speakRef.current(text)
-          // Auto-restart mic after speaking
-          if (voiceMode.isVoiceMode) {
-            setTimeout(() => enableVoiceRef.current(), 500)
+          if (voiceModeRef.current) {
+            setTimeout(() => startListeningRef.current(), 400)
           }
         }
       : undefined,
@@ -35,6 +36,8 @@ export default function App() {
   }, [])
 
   const voice = useVoiceRecognition(handleVoiceResult)
+
+  startListeningRef.current = voice.startListening
 
   const handleMicToggle = useCallback(() => {
     if (voice.isListening) {
@@ -64,6 +67,14 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-2">
+          {voiceMode.isVoiceMode && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 rounded-xl">
+              <Volume2 size={14} className="text-primary" />
+              <span className="text-[11px] font-medium text-primary">
+                {voiceMode.isSpeaking ? 'Samir parle...' : 'Mode vocal'}
+              </span>
+            </div>
+          )}
           {chat.messages.length > 0 && (
             <button
               onClick={() => {
@@ -87,6 +98,12 @@ export default function App() {
       {chat.error && (
         <div className="mx-4 mt-3 px-4 py-3 bg-danger/10 text-danger text-xs text-center rounded-2xl">
           {chat.error}
+        </div>
+      )}
+
+      {voiceMode.ttsError && (
+        <div className="mx-4 mt-3 px-4 py-3 bg-warning/10 text-warning text-xs text-center rounded-2xl">
+          Erreur vocale: {voiceMode.ttsError}
         </div>
       )}
 
