@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #6C63FF;
+  --color-primary-light: #8B83FF;
+  --color-primary-dark: #4F46E5;
+  --color-primary-soft: #EDE9FF;
+  --color-accent: #FF6B9D;
+  --color-accent-light: #FF8FB8;
+  --color-accent-soft: #FFF0F5;
+  --color-mint: #43E97B;
+  --color-mint-soft: #E8FFF1;
+  --color-peach: #FF9A76;
+  --color-peach-soft: #FFF3EE;
+  --color-sky: #4FACFE;
+  --color-sky-soft: #EDF5FF;
+  --color-surface: #FBFBFE;
+  --color-surface-card: #FFFFFF;
+  --color-surface-hover: #F5F3FF;
+  --color-coach-bg: #F8F7FF;
+  --color-coach-border: #E8E5FF;
+  --color-user-bg: #6C63FF;
+  --color-user-text: #FFFFFF;
+  --color-text-primary: #1A1635;
+  --color-text-secondary: #6B6B8D;
+  --color-text-muted: #A8A8C0;
+  --color-border: #F0EEFA;
+  --color-border-strong: #E0DCF0;
+  --color-danger: #FF5757;
+  --color-warning: #FFB84D;
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  --animate-pulse-slow: pulse-slow 3s ease-in-out infinite;
+  --animate-orb: orb 2s ease-in-out infinite;
+  --animate-fade-in: fade-in 0.4s ease-out;
+  --animate-slide-up: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.08); }
+}
+
+@keyframes orb {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(108, 99, 255, 0.25); }
+  25% { transform: scale(1.12); box-shadow: 0 0 50px rgba(108, 99, 255, 0.4); }
+  50% { transform: scale(0.92); box-shadow: 0 0 35px rgba(108, 99, 255, 0.3); }
+  75% { transform: scale(1.08); box-shadow: 0 0 45px rgba(108, 99, 255, 0.35); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 999px;
+}
