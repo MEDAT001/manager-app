@@ -1,25 +1,18 @@
 import { logger } from '../lib/logger'
 
-const TTS_MODEL = 'hexgrad/kokoro-82m'
-const TTS_VOICE = 'ff_siwis'
-const MAX_TEXT_LENGTH = 500
+const MAX_TEXT_LENGTH = 5000
 
 export async function synthesizeSpeech(text: string): Promise<Blob> {
   const truncated = text.length > MAX_TEXT_LENGTH
     ? text.slice(0, MAX_TEXT_LENGTH) + '...'
     : text
 
-  logger.info('Synthèse vocale', { length: truncated.length })
+  logger.info('Synthèse vocale ElevenLabs', { length: truncated.length })
 
   const response = await fetch('/api/tts', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: TTS_MODEL,
-      input: truncated,
-      voice: TTS_VOICE,
-      response_format: 'mp3',
-    }),
+    body: JSON.stringify({ text: truncated }),
   })
 
   if (!response.ok) {
