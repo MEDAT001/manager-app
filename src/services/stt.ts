@@ -1,7 +1,19 @@
 let mediaRecorder: MediaRecorder | null = null
 let audioChunks: Blob[] = []
+let currentStream: MediaStream | null = null
+
+function cleanupStream() {
+  if (currentStream) {
+    currentStream.getTracks().forEach((t) => t.stop())
+    currentStream = null
+  }
+  mediaRecorder = null
+  audioChunks = []
+}
 
 export async function startRecording(): Promise<void> {
+  cleanupStream()
+
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: {
       channelCount: 1,
@@ -11,6 +23,7 @@ export async function startRecording(): Promise<void> {
     },
   })
 
+  currentStream = stream
   audioChunks = []
 
   const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
@@ -29,29 +42,39 @@ export async function startRecording(): Promise<void> {
 }
 
 export async function stopRecording(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    if (!mediaRecorder || mediaRecorder.state === 'inactive') {
-      reject(new Error('No active recording'))
-      return
-    }
+  if (!mediaRecorder || mediaRecorder.state === 'inactive' || !currentStream) {
+    cleanupStream()
+    return ''
+  }
 
-    mediaRecorder.onstop = async () => {
+  return new Promise((resolve) => {
+    mediaRecorder!.onstop = async () => {
+      const chunks = [...audioChunks]
+      const mime = mediaRecorder!.mimeType
+      cleanupStream()
+
+      if (chunks.length === 0) {
+        resolve('')
+        return
+      }
+
       try {
-        const blob = new Blob(audioChunks, { type: mediaRecorder!.mimeType })
+        const blob = new Blob(chunks, { type: mime })
+        if (blob.size < 1000) {
+          resolve('')
+          return
+        }
         const base64 = await blobToBase64(blob)
-        const format = mediaRecorder!.mimeType.includes('webm') ? 'webm' : 'mp3'
+        const format = mime.includes('webm') ? 'webm' : 'mp3'
         const text = await transcribe(base64, format)
         resolve(text)
       } catch (err) {
-        reject(err)
-      } finally {
-        mediaRecorder?.stream.getTracks().forEach((t) => t.stop())
-        mediaRecorder = null
-        audioChunks = []
+        console.error('STT error:', err)
+        resolve('')
       }
     }
 
-    mediaRecorder.stop()
+    mediaRecorder!.stop()
   })
 }
 
@@ -82,4 +105,8 @@ async function transcribe(base64Audio: string, format: string): Promise<string> 
 
   const data = await response.json()
   return data.text || ''
+}
+
+export function isRecording(): boolean {
+  return mediaRecorder !== null && mediaRecorder.state === 'recording'
 }

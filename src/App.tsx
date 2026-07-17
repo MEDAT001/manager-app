@@ -10,8 +10,6 @@ import { useVoiceMode } from './hooks/useVoiceMode'
 
 type AppMode = 'select' | 'chat' | 'conversation'
 
-const MIC_RESTART_DELAY = 1500
-
 export default function App() {
   const [mode, setMode] = useState<AppMode>('select')
   const voiceMode = useVoiceMode()
@@ -21,6 +19,7 @@ export default function App() {
 
   const [lastReply, setLastReply] = useState('')
   const [isThinking, setIsThinking] = useState(false)
+  const autoRestartRef = useRef(false)
 
   const startListeningRef = useRef<() => void>(() => {})
   const stopListeningRef = useRef<() => void>(() => {})
@@ -28,20 +27,14 @@ export default function App() {
   const chat = useChat({
     onReply: mode === 'conversation' && voiceMode.isVoiceMode
       ? async (text) => {
-          // Stop mic while Samir speaks
           stopListeningRef.current()
           setLastReply(text)
           setIsThinking(false)
+          autoRestartRef.current = true
           await speakRef.current(text)
-          // Wait for audio to finish, then auto-restart mic
-          await new Promise((r) => setTimeout(r, MIC_RESTART_DELAY))
-          startListeningRef.current()
-        }
-      : undefined,
-    onThinking: mode === 'conversation' && voiceMode.isVoiceMode
-      ? () => {
-          stopListeningRef.current()
-          setIsThinking(true)
+          if (autoRestartRef.current) {
+            await startListeningRef.current()
+          }
         }
       : undefined,
   })
@@ -51,6 +44,7 @@ export default function App() {
 
   const handleVoiceResult = useCallback((text: string) => {
     setIsThinking(false)
+    setLastReply('')
     sendMessageRef.current(text)
   }, [])
 
@@ -60,12 +54,14 @@ export default function App() {
 
   const handleSelectMode = useCallback((selected: 'chat' | 'conversation') => {
     setMode(selected)
+    autoRestartRef.current = false
     if (selected === 'conversation') {
       voiceMode.enable()
     }
   }, [voiceMode])
 
   const handleMicToggle = useCallback(() => {
+    autoRestartRef.current = false
     if (voice.isListening) {
       voice.stopListening()
     } else {
@@ -75,6 +71,7 @@ export default function App() {
   }, [voice])
 
   const handleBackToSelect = useCallback(() => {
+    autoRestartRef.current = false
     chat.clearMessages()
     voiceMode.disable()
     if (voice.isListening) voice.stopListening()
@@ -125,6 +122,7 @@ export default function App() {
           {chat.messages.length > 0 && (
             <button
               onClick={() => {
+                autoRestartRef.current = false
                 chat.clearMessages()
                 if (voice.isListening) voice.stopListening()
               }}
