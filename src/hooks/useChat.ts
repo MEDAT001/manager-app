@@ -10,6 +10,7 @@ function uid(): string {
 
 interface UseChatOptions {
   onReply?: (text: string) => void
+  onThinking?: () => void
 }
 
 export function useChat(options?: UseChatOptions) {
@@ -20,9 +21,11 @@ export function useChat(options?: UseChatOptions) {
   const messagesRef = useRef<Message[]>([])
   const abortRef = useRef(false)
   const onReplyRef = useRef(options?.onReply)
+  const onThinkingRef = useRef(options?.onThinking)
 
   messagesRef.current = messages
   onReplyRef.current = options?.onReply
+  onThinkingRef.current = options?.onThinking
 
   const sendMessageToAPI = useCallback(async (content: string) => {
     const trimmed = content.trim()
@@ -52,6 +55,7 @@ export function useChat(options?: UseChatOptions) {
 
     try {
       const allMessages = [...messagesRef.current.slice(0, -1), userMsg]
+      onThinkingRef.current?.()
       const fullText = await sendMessage(allMessages)
 
       if (abortRef.current) return

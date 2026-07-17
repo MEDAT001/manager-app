@@ -10,6 +10,8 @@ import { useVoiceMode } from './hooks/useVoiceMode'
 
 type AppMode = 'select' | 'chat' | 'conversation'
 
+const MIC_RESTART_DELAY = 1500
+
 export default function App() {
   const [mode, setMode] = useState<AppMode>('select')
   const voiceMode = useVoiceMode()
@@ -18,20 +20,32 @@ export default function App() {
   speakRef.current = voiceMode.speakText
 
   const [lastReply, setLastReply] = useState('')
+  const [isThinking, setIsThinking] = useState(false)
   const [awaitingUser, setAwaitingUser] = useState(false)
 
+  const startListeningRef = useRef<() => void>(() => {})
   const stopListeningRef = useRef<() => void>(() => {})
 
   const chat = useChat({
     onReply: mode === 'conversation' && voiceMode.isVoiceMode
       ? async (text) => {
-          // Cut mic while Samir speaks to avoid echo loop
+          // Stop mic while Samir speaks
           stopListeningRef.current()
           setLastReply(text)
           setAwaitingUser(false)
+          setIsThinking(false)
           await speakRef.current(text)
-          // After speaking, wait for user to press mic
-          setAwaitingUser(true)
+          // Wait for audio to finish playing, then restart mic
+          await new Promise((r) => setTimeout(r, MIC_RESTART_DELAY))
+          startListeningRef.current()
+          setAwaitingUser(false)
+        }
+      : undefined,
+    onThinking: mode === 'conversation' && voiceMode.isVoiceMode
+      ? () => {
+          stopListeningRef.current()
+          setIsThinking(true)
+          setAwaitingUser(false)
         }
       : undefined,
   })
@@ -41,10 +55,12 @@ export default function App() {
 
   const handleVoiceResult = useCallback((text: string) => {
     setAwaitingUser(false)
+    setIsThinking(false)
     sendMessageRef.current(text)
   }, [])
 
   const voice = useVoiceRecognition(handleVoiceResult)
+  startListeningRef.current = voice.startListening
   stopListeningRef.current = voice.stopListening
 
   const handleSelectMode = useCallback((selected: 'chat' | 'conversation') => {
@@ -59,6 +75,7 @@ export default function App() {
       voice.stopListening()
     } else {
       setAwaitingUser(false)
+      setIsThinking(false)
       voice.startListening()
     }
   }, [voice])
@@ -69,6 +86,7 @@ export default function App() {
     if (voice.isListening) voice.stopListening()
     setMode('select')
     setLastReply('')
+    setIsThinking(false)
     setAwaitingUser(false)
   }, [chat, voiceMode, voice])
 
@@ -81,6 +99,7 @@ export default function App() {
       <ConversationMode
         isSpeaking={voiceMode.isSpeaking}
         isListening={voice.isListening}
+        isThinking={isThinking}
         transcription={voice.transcript}
         voiceStatus={voice.status}
         voiceError={voice.error}

@@ -1,6 +1,17 @@
 let audioContext: AudioContext | null = null
 let currentSource: AudioBufferSourceNode | null = null
 
+// Premium French male voice IDs (ordered by preference)
+const FRENCH_VOICES = [
+  { id: 'CYR0HqHoZAUmoZsLWPob', name: 'Sébastien' },  // Warm, calm, narrative
+  { id: '6kimG24ccauj1GNOEFjF', name: 'Benjamin' },    // Velvety, warm timbre
+  { id: 'fz4G5jaMWUPbfs2rKKNy', name: 'Frédéric' },   // Confident, warm
+  { id: 'ckgFqgT4MZNQ3bggyZiF', name: 'Mathieu' },    // Deep, authoritative
+  { id: 'pNInz6obpgDQGcFmaJgB', name: 'Adam' },        // Premade fallback, deep male
+]
+
+const VOICE_MODEL = 'eleven_multilingual_v2'
+
 function getAudioContext(): AudioContext {
   if (!audioContext || audioContext.state === 'closed') {
     audioContext = new AudioContext()
@@ -19,43 +30,60 @@ export function initAudioContext(): void {
 async function speakElevenLabs(text: string): Promise<void> {
   const truncated = text.length > 5000 ? text.slice(0, 5000) + '...' : text
 
-  const response = await fetch('/api/tts', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: truncated }),
-  })
+  let lastError: Error | null = null
 
-  if (!response.ok) {
-    throw new Error(`ElevenLabs TTS failed: ${response.status}`)
-  }
-
-  const arrayBuffer = await response.arrayBuffer()
-
-  if (arrayBuffer.byteLength < 1000) {
-    throw new Error('Audio trop petit, réponse invalide')
-  }
-
-  const ctx = getAudioContext()
-  const audioBuffer = await ctx.decodeAudioData(arrayBuffer)
-
-  return new Promise((resolve, reject) => {
-    const source = ctx.createBufferSource()
-    source.buffer = audioBuffer
-    source.connect(ctx.destination)
-    currentSource = source
-
-    source.onended = () => {
-      currentSource = null
-      resolve()
-    }
-
+  for (const voice of FRENCH_VOICES) {
     try {
-      source.start(0)
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: truncated,
+          voice_id: voice.id,
+          model_id: VOICE_MODEL,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+
+      const arrayBuffer = await response.arrayBuffer()
+
+      if (arrayBuffer.byteLength < 1000) {
+        throw new Error('Audio trop petit')
+      }
+
+      const ctx = getAudioContext()
+      const audioBuffer = await ctx.decodeAudioData(arrayBuffer)
+
+      await new Promise<void>((resolve, reject) => {
+        const source = ctx.createBufferSource()
+        source.buffer = audioBuffer
+        source.connect(ctx.destination)
+        currentSource = source
+
+        source.onended = () => {
+          currentSource = null
+          resolve()
+        }
+
+        try {
+          source.start(0)
+        } catch (err) {
+          currentSource = null
+          reject(err)
+        }
+      })
+
+      return
     } catch (err) {
-      currentSource = null
-      reject(err)
+      lastError = err instanceof Error ? err : new Error(String(err))
+      continue
     }
-  })
+  }
+
+  throw lastError || new Error('All ElevenLabs voices failed')
 }
 
 // FALLBACK: SpeechSynthesis navigateur
@@ -104,12 +132,10 @@ export async function speak(text: string): Promise<void> {
 }
 
 export function stopSpeaking(): void {
-  // Stop Web Audio
   if (currentSource) {
     try { currentSource.stop() } catch { /* already stopped */ }
     currentSource = null
   }
-  // Stop SpeechSynthesis
   if (window.speechSynthesis) {
     speechSynthesis.cancel()
   }

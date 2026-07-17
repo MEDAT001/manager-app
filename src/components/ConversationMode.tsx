@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react'
 interface Props {
   isSpeaking: boolean
   isListening: boolean
+  isThinking: boolean
   transcription: string
   voiceStatus: string
   voiceError: string | null
@@ -16,6 +17,7 @@ interface Props {
 export function ConversationMode({
   isSpeaking,
   isListening,
+  isThinking,
   transcription,
   voiceStatus,
   voiceError,
@@ -130,6 +132,16 @@ export function ConversationMode({
                 Réessayer
               </button>
             </div>
+          ) : isThinking ? (
+            <div className="flex items-center justify-center gap-2">
+              <div className="flex gap-1">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="w-2 h-2 bg-primary rounded-full animate-bounce"
+                    style={{ animationDelay: `${i * 0.15}s` }} />
+                ))}
+              </div>
+              <span className="text-text-muted text-sm">Samir réfléchit...</span>
+            </div>
           ) : displayedText ? (
             <p className="text-lg text-text-primary leading-relaxed font-medium">
               {displayedText}
@@ -142,10 +154,12 @@ export function ConversationMode({
                 <p className="text-text-primary text-base italic">"{transcription}"</p>
               )}
             </div>
-          ) : awaitingUser ? (
-            <p className="text-text-muted text-sm">Appuie sur le micro pour répondre</p>
           ) : (
-            <p className="text-text-muted text-sm">Appuie sur le micro pour commencer</p>
+            <p className="text-text-muted text-sm">
+              {awaitingUser
+                ? 'Appuie sur le micro pour répondre'
+                : 'Appuie sur le micro pour commencer'}
+            </p>
           )}
         </div>
       </div>
