@@ -1,10 +1,7 @@
 import { logger } from '../lib/logger'
 
-const MAX_TEXT_LENGTH = 5000
-
 let audioContext: AudioContext | null = null
 let currentSource: AudioBufferSourceNode | null = null
-let currentTimeout: ReturnType<typeof setTimeout> | null = null
 
 function getAudioContext(): AudioContext {
   if (!audioContext || audioContext.state === 'closed') {
@@ -21,11 +18,9 @@ export function initAudioContext(): void {
 }
 
 export async function synthesizeSpeech(text: string): Promise<ArrayBuffer> {
-  const truncated = text.length > MAX_TEXT_LENGTH
-    ? text.slice(0, MAX_TEXT_LENGTH) + '...'
-    : text
+  const truncated = text.length > 500 ? text.slice(0, 500) + '...' : text
 
-  logger.info('Synthèse vocale ElevenLabs', { length: truncated.length })
+  logger.info('Synthèse vocale kokoro', { length: truncated.length })
 
   const response = await fetch('/api/tts', {
     method: 'POST',
@@ -70,10 +65,6 @@ export async function speak(text: string): Promise<void> {
 }
 
 export function stopSpeaking(): void {
-  if (currentTimeout) {
-    clearTimeout(currentTimeout)
-    currentTimeout = null
-  }
   if (currentSource) {
     try {
       currentSource.stop()

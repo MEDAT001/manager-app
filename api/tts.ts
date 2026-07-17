@@ -19,43 +19,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Text is required' })
   }
 
-  const apiKey = process.env.ELEVENLABS_API_KEY
+  const apiKey = process.env.OPENROUTER_API_KEY
   if (!apiKey) {
-    console.error('ELEVENLABS_API_KEY not set')
-    return res.status(500).json({ error: 'ElevenLabs API key not configured' })
+    console.error('OPENROUTER_API_KEY not set')
+    return res.status(500).json({ error: 'API key not configured' })
   }
 
-  const VOICE_ID = 'pNInz6obpgDQGcFmaJgB'
-  const MODEL_ID = 'eleven_multilingual_v2'
+  const truncated = text.length > 500 ? text.slice(0, 500) + '...' : text
 
-  console.log('TTS request:', { textLength: text.length, voiceId: VOICE_ID, modelId: MODEL_ID })
+  console.log('TTS request:', { textLength: truncated.length, model: 'hexgrad/kokoro-82m' })
 
   try {
-    const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'xi-api-key': apiKey,
-        },
-        body: JSON.stringify({
-          text,
-          model_id: MODEL_ID,
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75,
-            style: 0.3,
-          },
-        }),
-      }
-    )
+    const response = await fetch('https://openrouter.ai/api/v1/audio/speech', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://manager-app.vercel.app',
+        'X-Title': 'Manager.app',
+      },
+      body: JSON.stringify({
+        model: 'hexgrad/kokoro-82m',
+        input: truncated,
+        voice: 'ff_siwis',
+        response_format: 'mp3',
+      }),
+    })
 
-    console.log('ElevenLabs response:', response.status, response.headers.get('content-type'))
+    console.log('OpenRouter TTS response:', response.status, response.headers.get('content-type'))
 
     if (!response.ok) {
       const errText = await response.text()
-      console.error('ElevenLabs error:', response.status, errText)
+      console.error('OpenRouter TTS error:', response.status, errText)
       return res.status(response.status).json({ error: `TTS failed: ${response.status}`, detail: errText })
     }
 
@@ -67,6 +62,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).send(Buffer.from(audioBuffer))
   } catch (err) {
     console.error('TTS exception:', err)
-    return res.status(500).json({ error: 'Failed to reach ElevenLabs API', detail: String(err) })
+    return res.status(500).json({ error: 'Failed to reach TTS API', detail: String(err) })
   }
 }

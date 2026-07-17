@@ -25,16 +25,17 @@ export default defineConfig(({ mode }) => {
           },
         },
         '/api/tts': {
-          target: 'https://api.elevenlabs.io',
+          target: 'https://openrouter.ai',
           changeOrigin: true,
-          rewrite: () => '/v1/text-to-speech/0bKGtCCpdKSI5NjGhU3z',
+          rewrite: () => '/api/v1/audio/speech',
           configure: (proxy) => {
             proxy.on('proxyReq', (proxyReq) => {
-              const key = env.VITE_ELEVENLABS_API_KEY
+              const key = env.VITE_OPENROUTER_API_KEY
               if (key) {
-                proxyReq.setHeader('xi-api-key', key)
+                proxyReq.setHeader('Authorization', `Bearer ${key}`)
               }
-              proxyReq.setHeader('Content-Type', 'application/json')
+              proxyReq.setHeader('HTTP-Referer', 'https://manager-app.local')
+              proxyReq.setHeader('X-Title', 'Manager.app')
             })
           },
         },

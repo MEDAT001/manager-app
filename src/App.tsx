@@ -1,12 +1,17 @@
-import { useCallback, useRef } from 'react'
-import { RefreshCw, MoreHorizontal, Volume2 } from 'lucide-react'
+import { useCallback, useRef, useState } from 'react'
+import { RefreshCw, MoreHorizontal } from 'lucide-react'
 import { ChatWindow } from './components/ChatWindow'
 import { ChatInput } from './components/ChatInput'
+import { ModeSelector } from './components/ModeSelector'
+import { ConversationMode } from './components/ConversationMode'
 import { useChat } from './hooks/useChat'
 import { useVoiceRecognition } from './hooks/useVoiceRecognition'
 import { useVoiceMode } from './hooks/useVoiceMode'
 
+type AppMode = 'select' | 'chat' | 'conversation'
+
 export default function App() {
+  const [mode, setMode] = useState<AppMode>('select')
   const voiceMode = useVoiceMode()
 
   const speakRef = useRef(voiceMode.speakText)
@@ -15,11 +20,16 @@ export default function App() {
   const voiceModeRef = useRef(voiceMode.isVoiceMode)
   voiceModeRef.current = voiceMode.isVoiceMode
 
+  const lastReplyRef = useRef('')
+  const [lastReply, setLastReply] = useState('')
+
   const startListeningRef = useRef<() => void>(() => {})
 
   const chat = useChat({
-    onReply: voiceMode.isVoiceMode
+    onReply: mode === 'conversation' && voiceMode.isVoiceMode
       ? async (text) => {
+          lastReplyRef.current = text
+          setLastReply(text)
           await speakRef.current(text)
           if (voiceModeRef.current) {
             setTimeout(() => startListeningRef.current(), 400)
@@ -39,6 +49,13 @@ export default function App() {
 
   startListeningRef.current = voice.startListening
 
+  const handleSelectMode = useCallback((selected: 'chat' | 'conversation') => {
+    setMode(selected)
+    if (selected === 'conversation') {
+      voiceMode.enable()
+    }
+  }, [voiceMode])
+
   const handleMicToggle = useCallback(() => {
     if (voice.isListening) {
       voice.stopListening()
@@ -48,6 +65,35 @@ export default function App() {
     }
   }, [voice, voiceMode])
 
+  const handleBackToSelect = useCallback(() => {
+    chat.clearMessages()
+    voiceMode.disable()
+    if (voice.isListening) voice.stopListening()
+    setMode('select')
+    setLastReply('')
+    lastReplyRef.current = ''
+  }, [chat, voiceMode, voice])
+
+  // MODE SELECTION
+  if (mode === 'select') {
+    return <ModeSelector onSelect={handleSelectMode} />
+  }
+
+  // CONVERSATION MODE
+  if (mode === 'conversation') {
+    return (
+      <ConversationMode
+        isSpeaking={voiceMode.isSpeaking}
+        isListening={voice.isListening}
+        transcription={voice.transcript}
+        lastReply={lastReply}
+        onBack={handleBackToSelect}
+        onMicToggle={handleMicToggle}
+      />
+    )
+  }
+
+  // CHAT MODE
   return (
     <div className="h-full flex flex-col bg-surface">
       <header className="flex items-center justify-between px-5 py-4 border-b border-border bg-surface-card/80 backdrop-blur-xl">
@@ -67,19 +113,10 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-2">
-          {voiceMode.isVoiceMode && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 rounded-xl">
-              <Volume2 size={14} className="text-primary" />
-              <span className="text-[11px] font-medium text-primary">
-                {voiceMode.isSpeaking ? 'Samir parle...' : 'Mode vocal'}
-              </span>
-            </div>
-          )}
           {chat.messages.length > 0 && (
             <button
               onClick={() => {
                 chat.clearMessages()
-                voiceMode.disable()
                 if (voice.isListening) voice.stopListening()
               }}
               className="p-2.5 rounded-xl text-text-muted hover:bg-surface-hover hover:text-primary transition-all duration-200"
@@ -98,12 +135,6 @@ export default function App() {
       {chat.error && (
         <div className="mx-4 mt-3 px-4 py-3 bg-danger/10 text-danger text-xs text-center rounded-2xl">
           {chat.error}
-        </div>
-      )}
-
-      {voiceMode.ttsError && (
-        <div className="mx-4 mt-3 px-4 py-3 bg-warning/10 text-warning text-xs text-center rounded-2xl">
-          Erreur vocale: {voiceMode.ttsError}
         </div>
       )}
 
