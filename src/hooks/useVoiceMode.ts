@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { speak, stopSpeaking, initSpeech } from '../services/tts'
+import { speak, stopSpeaking, initAudioContext } from '../services/tts'
 
 export function useVoiceMode() {
   const [isVoiceMode, setIsVoiceMode] = useState(false)
@@ -7,10 +7,11 @@ export function useVoiceMode() {
   const [ttsError, setTtsError] = useState<string | null>(null)
 
   useEffect(() => {
-    initSpeech()
+    initAudioContext()
   }, [])
 
   const enable = useCallback(() => {
+    initAudioContext()
     setIsVoiceMode(true)
     setTtsError(null)
   }, [])
@@ -22,14 +23,6 @@ export function useVoiceMode() {
     setTtsError(null)
   }, [])
 
-  const toggle = useCallback(() => {
-    if (isVoiceMode) {
-      disable()
-    } else {
-      enable()
-    }
-  }, [isVoiceMode, enable, disable])
-
   const speakText = useCallback(async (text: string) => {
     if (!text.trim()) return
     setIsSpeaking(true)
@@ -39,11 +32,10 @@ export function useVoiceMode() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erreur inconnue'
       setTtsError(msg)
-      console.error('TTS error:', msg)
     } finally {
       setIsSpeaking(false)
     }
   }, [])
 
-  return { isVoiceMode, isSpeaking, ttsError, enable, disable, toggle, speakText }
+  return { isVoiceMode, isSpeaking, ttsError, enable, disable, speakText }
 }

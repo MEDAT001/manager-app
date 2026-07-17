@@ -17,21 +17,21 @@ export default function App() {
   const speakRef = useRef(voiceMode.speakText)
   speakRef.current = voiceMode.speakText
 
-  const voiceModeRef = useRef(voiceMode.isVoiceMode)
-  voiceModeRef.current = voiceMode.isVoiceMode
-
   const [lastReply, setLastReply] = useState('')
+  const [awaitingUser, setAwaitingUser] = useState(false)
 
-  const startListeningRef = useRef<() => void>(() => {})
+  const stopListeningRef = useRef<() => void>(() => {})
 
   const chat = useChat({
     onReply: mode === 'conversation' && voiceMode.isVoiceMode
       ? async (text) => {
+          // Cut mic while Samir speaks to avoid echo loop
+          stopListeningRef.current()
           setLastReply(text)
+          setAwaitingUser(false)
           await speakRef.current(text)
-          if (voiceModeRef.current) {
-            setTimeout(() => startListeningRef.current(), 400)
-          }
+          // After speaking, wait for user to press mic
+          setAwaitingUser(true)
         }
       : undefined,
   })
@@ -40,12 +40,12 @@ export default function App() {
   sendMessageRef.current = chat.sendMessage
 
   const handleVoiceResult = useCallback((text: string) => {
+    setAwaitingUser(false)
     sendMessageRef.current(text)
   }, [])
 
   const voice = useVoiceRecognition(handleVoiceResult)
-
-  startListeningRef.current = voice.startListening
+  stopListeningRef.current = voice.stopListening
 
   const handleSelectMode = useCallback((selected: 'chat' | 'conversation') => {
     setMode(selected)
@@ -58,6 +58,7 @@ export default function App() {
     if (voice.isListening) {
       voice.stopListening()
     } else {
+      setAwaitingUser(false)
       voice.startListening()
     }
   }, [voice])
@@ -68,14 +69,13 @@ export default function App() {
     if (voice.isListening) voice.stopListening()
     setMode('select')
     setLastReply('')
+    setAwaitingUser(false)
   }, [chat, voiceMode, voice])
 
-  // MODE SELECTION
   if (mode === 'select') {
     return <ModeSelector onSelect={handleSelectMode} />
   }
 
-  // CONVERSATION MODE
   if (mode === 'conversation') {
     return (
       <ConversationMode
@@ -85,13 +85,13 @@ export default function App() {
         voiceStatus={voice.status}
         voiceError={voice.error}
         lastReply={lastReply}
+        awaitingUser={awaitingUser}
         onBack={handleBackToSelect}
         onMicToggle={handleMicToggle}
       />
     )
   }
 
-  // CHAT MODE
   return (
     <div className="h-full flex flex-col bg-surface">
       <header className="flex items-center justify-between px-5 py-4 border-b border-border bg-surface-card/80 backdrop-blur-xl">
