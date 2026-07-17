@@ -27,9 +27,9 @@ export default defineConfig(({ mode }) => {
         '/api/tts': {
           target: 'https://api.elevenlabs.io',
           changeOrigin: true,
-          rewrite: (path) => `/v1/text-to-speech/0bKGtCCpdKSI5NjGhU3z`,
+          rewrite: () => '/v1/text-to-speech/0bKGtCCpdKSI5NjGhU3z',
           configure: (proxy) => {
-            proxy.on('proxyReq', (proxyReq, req) => {
+            proxy.on('proxyReq', (proxyReq) => {
               const key = env.VITE_ELEVENLABS_API_KEY
               if (key) {
                 proxyReq.setHeader('xi-api-key', key)
