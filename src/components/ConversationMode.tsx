@@ -9,7 +9,6 @@ interface Props {
   voiceStatus: string
   voiceError: string | null
   lastReply: string
-  awaitingUser: boolean
   onBack: () => void
   onMicToggle: () => void
 }
@@ -22,7 +21,6 @@ export function ConversationMode({
   voiceStatus,
   voiceError,
   lastReply,
-  awaitingUser,
   onBack,
   onMicToggle,
 }: Props) {
@@ -149,17 +147,13 @@ export function ConversationMode({
             </p>
           ) : isListening ? (
             <div>
-              <p className="text-accent font-medium text-sm mb-1">{voiceStatus || 'Parle...'}</p>
+              <p className="text-accent font-medium text-sm mb-1">{voiceStatus || 'Parle maintenant...'}</p>
               {transcription && (
                 <p className="text-text-primary text-base italic">"{transcription}"</p>
               )}
             </div>
           ) : (
-            <p className="text-text-muted text-sm">
-              {awaitingUser
-                ? 'Appuie sur le micro pour répondre'
-                : 'Appuie sur le micro pour commencer'}
-            </p>
+            <p className="text-text-muted text-sm">Appuie sur le micro pour commencer</p>
           )}
         </div>
       </div>

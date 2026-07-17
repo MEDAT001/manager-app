@@ -21,7 +21,6 @@ export default function App() {
 
   const [lastReply, setLastReply] = useState('')
   const [isThinking, setIsThinking] = useState(false)
-  const [awaitingUser, setAwaitingUser] = useState(false)
 
   const startListeningRef = useRef<() => void>(() => {})
   const stopListeningRef = useRef<() => void>(() => {})
@@ -32,20 +31,17 @@ export default function App() {
           // Stop mic while Samir speaks
           stopListeningRef.current()
           setLastReply(text)
-          setAwaitingUser(false)
           setIsThinking(false)
           await speakRef.current(text)
-          // Wait for audio to finish playing, then restart mic
+          // Wait for audio to finish, then auto-restart mic
           await new Promise((r) => setTimeout(r, MIC_RESTART_DELAY))
           startListeningRef.current()
-          setAwaitingUser(false)
         }
       : undefined,
     onThinking: mode === 'conversation' && voiceMode.isVoiceMode
       ? () => {
           stopListeningRef.current()
           setIsThinking(true)
-          setAwaitingUser(false)
         }
       : undefined,
   })
@@ -54,7 +50,6 @@ export default function App() {
   sendMessageRef.current = chat.sendMessage
 
   const handleVoiceResult = useCallback((text: string) => {
-    setAwaitingUser(false)
     setIsThinking(false)
     sendMessageRef.current(text)
   }, [])
@@ -74,7 +69,6 @@ export default function App() {
     if (voice.isListening) {
       voice.stopListening()
     } else {
-      setAwaitingUser(false)
       setIsThinking(false)
       voice.startListening()
     }
@@ -87,7 +81,6 @@ export default function App() {
     setMode('select')
     setLastReply('')
     setIsThinking(false)
-    setAwaitingUser(false)
   }, [chat, voiceMode, voice])
 
   if (mode === 'select') {
@@ -104,7 +97,6 @@ export default function App() {
         voiceStatus={voice.status}
         voiceError={voice.error}
         lastReply={lastReply}
-        awaitingUser={awaitingUser}
         onBack={handleBackToSelect}
         onMicToggle={handleMicToggle}
       />

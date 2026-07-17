@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { startRecording, stopRecording } from '../services/stt'
 
 interface VoiceState {
@@ -16,6 +16,9 @@ export function useVoiceRecognition(onResult: (text: string) => void) {
   const [error, setError] = useState<string | null>(null)
   const [status, setStatus] = useState<string>('')
 
+  const onResultRef = useRef(onResult)
+  onResultRef.current = onResult
+
   const startListening = useCallback(async () => {
     setError(null)
 
@@ -23,7 +26,7 @@ export function useVoiceRecognition(onResult: (text: string) => void) {
       setStatus('Démarrage du micro...')
       await startRecording()
       setState((s) => ({ ...s, isListening: true, transcript: '' }))
-      setStatus('Parle maintenant... puis clique pour arrêter')
+      setStatus('Parle maintenant...')
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erreur micro'
       console.error('Recording error:', msg)
@@ -34,16 +37,16 @@ export function useVoiceRecognition(onResult: (text: string) => void) {
 
   const stopListening = useCallback(async () => {
     try {
-      setStatus('Transcription en cours...')
+      setStatus('Transcription...')
       setState((s) => ({ ...s, isListening: false }))
       const text = await stopRecording()
 
       if (text.trim()) {
         console.log('STT result:', text)
-        setStatus('Compris ! Envoi...')
-        onResult(text)
+        setStatus('Compris !')
+        onResultRef.current(text)
       } else {
-        setStatus('')
+        setStatus('Aucune voix détectée')
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erreur transcription'
@@ -51,7 +54,7 @@ export function useVoiceRecognition(onResult: (text: string) => void) {
       setError(msg)
       setStatus('')
     }
-  }, [onResult])
+  }, [])
 
   return { ...state, error, status, startListening, stopListening }
 }
