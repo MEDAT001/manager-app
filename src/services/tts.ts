@@ -96,8 +96,8 @@ function speakFallback(text: string): Promise<void> {
 
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.lang = 'fr-FR'
-    utterance.rate = 1.0
-    utterance.pitch = 0.9
+    utterance.rate = 0.9
+    utterance.pitch = 0.85
     utterance.volume = 1.0
 
     const voices = speechSynthesis.getVoices()
