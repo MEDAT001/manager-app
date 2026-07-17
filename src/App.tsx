@@ -1,12 +1,20 @@
 import { useCallback, useRef } from 'react'
-import { RefreshCw, MoreHorizontal } from 'lucide-react'
+import { RefreshCw, Volume2, VolumeX } from 'lucide-react'
 import { ChatWindow } from './components/ChatWindow'
 import { ChatInput } from './components/ChatInput'
 import { useChat } from './hooks/useChat'
 import { useVoiceRecognition } from './hooks/useVoiceRecognition'
+import { useVoiceMode } from './hooks/useVoiceMode'
 
 export default function App() {
-  const chat = useChat()
+  const voiceMode = useVoiceMode()
+
+  const speakRef = useRef(voiceMode.speakText)
+  speakRef.current = voiceMode.speakText
+
+  const chat = useChat({
+    onReply: voiceMode.isVoiceMode ? (text) => speakRef.current(text) : undefined,
+  })
 
   const sendMessageRef = useRef(chat.sendMessage)
   sendMessageRef.current = chat.sendMessage
@@ -36,6 +44,18 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={voiceMode.toggle}
+            className={`p-2.5 rounded-xl transition-all duration-200 ${
+              voiceMode.isVoiceMode
+                ? 'bg-primary/10 text-primary shadow-sm'
+                : 'text-text-muted hover:bg-surface-hover hover:text-primary'
+            }`}
+            aria-label={voiceMode.isVoiceMode ? 'Mode silencieux' : 'Mode vocal'}
+            title={voiceMode.isVoiceMode ? 'Mode silencieux' : 'Mode conversation'}
+          >
+            {voiceMode.isVoiceMode ? <Volume2 size={16} /> : <VolumeX size={16} />}
+          </button>
           {chat.messages.length > 0 && (
             <button
               onClick={chat.clearMessages}
@@ -46,9 +66,6 @@ export default function App() {
               <RefreshCw size={16} />
             </button>
           )}
-          <button className="p-2.5 rounded-xl text-text-muted hover:bg-surface-hover transition-all duration-200">
-            <MoreHorizontal size={16} />
-          </button>
         </div>
       </header>
 

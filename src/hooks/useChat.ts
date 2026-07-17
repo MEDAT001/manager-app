@@ -8,7 +8,11 @@ function uid(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7)
 }
 
-export function useChat() {
+interface UseChatOptions {
+  onReply?: (text: string) => void
+}
+
+export function useChat(options?: UseChatOptions) {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isTyping, setIsTyping] = useState(false)
@@ -68,6 +72,10 @@ export function useChat() {
 
       setIsTyping(false)
       logger.info('Réponse complétée', { length: fullText.length })
+
+      if (!abortRef.current && options?.onReply) {
+        options.onReply(fullText)
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erreur inconnue'
       logger.error('Erreur envoi', msg)

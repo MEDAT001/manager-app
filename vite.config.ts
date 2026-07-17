@@ -9,10 +9,25 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), tailwindcss()],
     server: {
       proxy: {
-        '/api': {
+        '/api/chat': {
           target: 'https://openrouter.ai',
           changeOrigin: true,
           rewrite: () => '/api/v1/chat/completions',
+          configure: (proxy) => {
+            proxy.on('proxyReq', (proxyReq) => {
+              const key = env.VITE_OPENROUTER_API_KEY
+              if (key) {
+                proxyReq.setHeader('Authorization', `Bearer ${key}`)
+              }
+              proxyReq.setHeader('HTTP-Referer', 'https://manager-app.local')
+              proxyReq.setHeader('X-Title', 'Manager.app')
+            })
+          },
+        },
+        '/api/tts': {
+          target: 'https://openrouter.ai',
+          changeOrigin: true,
+          rewrite: () => '/api/v1/audio/speech',
           configure: (proxy) => {
             proxy.on('proxyReq', (proxyReq) => {
               const key = env.VITE_OPENROUTER_API_KEY
