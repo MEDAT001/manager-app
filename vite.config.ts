@@ -39,6 +39,21 @@ export default defineConfig(({ mode }) => {
             })
           },
         },
+        '/api/stt': {
+          target: 'https://openrouter.ai',
+          changeOrigin: true,
+          rewrite: () => '/api/v1/audio/transcriptions',
+          configure: (proxy) => {
+            proxy.on('proxyReq', (proxyReq) => {
+              const key = env.VITE_OPENROUTER_API_KEY
+              if (key) {
+                proxyReq.setHeader('Authorization', `Bearer ${key}`)
+              }
+              proxyReq.setHeader('HTTP-Referer', 'https://manager-app.local')
+              proxyReq.setHeader('X-Title', 'Manager.app')
+            })
+          },
+        },
       },
     },
   }
