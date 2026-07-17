@@ -103,8 +103,8 @@ export default function App() {
     <div className="h-full flex flex-col bg-surface">
       <header className="flex items-center justify-between px-5 py-4 border-b border-border bg-surface-card/80 backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-[14px] bg-gradient-to-br from-primary to-primary-light flex items-center justify-center shadow-lg shadow-primary/20">
-            <span className="text-white font-bold text-sm">S</span>
+          <div className="w-10 h-10 rounded-[14px] overflow-hidden shadow-lg shadow-primary/20">
+            <img src="/logo.png" alt="Samir" className="w-full h-full object-cover" />
           </div>
           <div>
             <span className="font-semibold text-text-primary text-[15px] tracking-tight block leading-tight">

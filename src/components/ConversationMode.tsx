@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft } from 'lucide-react'
+import { OrbAnimation } from './OrbAnimation'
 
 interface Props {
   isSpeaking: boolean
@@ -81,40 +82,20 @@ export function ConversationMode({
             <span className={`w-1.5 h-1.5 rounded-full inline-block ${
               isSpeaking ? 'bg-primary animate-pulse' : isListening ? 'bg-accent animate-pulse' : 'bg-mint'
             }`} />
-            {isSpeaking ? 'Samir parle...' : isListening ? 'Écoute...' : 'En ligne'}
+            {isSpeaking ? 'Samir parle...' : isListening ? 'Écoute...' : isThinking ? 'Réfléchit...' : 'En ligne'}
           </span>
         </div>
       </header>
 
       <div className="flex-1 flex flex-col items-center justify-center px-6">
+        {/* Orb */}
         <div className="relative mb-8">
-          <div className={`absolute -inset-8 rounded-full transition-all duration-700 ${
-            isSpeaking
-              ? 'bg-primary/10 scale-110'
-              : isListening
-                ? 'bg-accent/10 scale-105'
-                : 'bg-primary/5'
-          }`} />
-
-          <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center shadow-lg shadow-primary/10">
-            <div className={`absolute inset-2 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 transition-all duration-500 ${
-              isSpeaking ? 'animate-pulse scale-110' : ''
-            }`} />
-            <div className={`absolute inset-5 rounded-full bg-gradient-to-br from-primary to-primary-light flex items-center justify-center shadow-xl shadow-primary/30 transition-all duration-500 ${
-              isSpeaking ? 'scale-105' : ''
-            }`}>
-              <span className="text-white font-bold text-2xl">S</span>
-            </div>
-          </div>
-
-          {isListening && !isSpeaking && (
-            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-              {[0, 1, 2].map((i) => (
-                <div key={i} className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce"
-                  style={{ animationDelay: `${i * 0.15}s` }} />
-              ))}
-            </div>
-          )}
+          <OrbAnimation
+            size={180}
+            isActive={true}
+            isListening={isListening}
+            isSpeaking={isSpeaking}
+          />
         </div>
 
         <div className="w-full max-w-md text-center min-h-[120px]">

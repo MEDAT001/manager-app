@@ -59,6 +59,42 @@
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* Orb morphing animations */
+@keyframes orb-morph-1 {
+  0%, 100% { border-radius: 42% 58% 55% 45% / 55% 42% 58% 45%; transform: rotate(0deg) scale(1); }
+  25% { border-radius: 55% 45% 42% 58% / 42% 55% 45% 58%; transform: rotate(30deg) scale(1.05); }
+  50% { border-radius: 48% 52% 58% 42% / 52% 48% 42% 58%; transform: rotate(60deg) scale(0.95); }
+  75% { border-radius: 58% 42% 45% 55% / 45% 58% 55% 42%; transform: rotate(90deg) scale(1.03); }
+}
+
+@keyframes orb-morph-2 {
+  0%, 100% { border-radius: 55% 45% 48% 52% / 48% 55% 52% 48%; transform: rotate(0deg) scale(1); }
+  33% { border-radius: 45% 55% 52% 48% / 55% 45% 48% 52%; transform: rotate(-45deg) scale(1.08); }
+  66% { border-radius: 52% 48% 55% 45% / 42% 58% 45% 55%; transform: rotate(-90deg) scale(0.92); }
+}
+
+@keyframes orb-morph-3 {
+  0%, 100% { border-radius: 50% 50% 45% 55% / 55% 45% 50% 50%; transform: rotate(0deg) scale(1); }
+  25% { border-radius: 45% 55% 50% 50% / 50% 50% 55% 45%; transform: rotate(60deg) scale(1.1); }
+  50% { border-radius: 55% 45% 55% 45% / 45% 55% 45% 55%; transform: rotate(120deg) scale(0.9); }
+  75% { border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; transform: rotate(180deg) scale(1.05); }
+}
+
+@keyframes orb-core-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+
+@keyframes orb-glow-speaking {
+  0%, 100% { transform: scale(1.2); opacity: 0.6; }
+  50% { transform: scale(1.4); opacity: 0.9; }
+}
+
+@keyframes orb-glow-listening {
+  0%, 100% { transform: scale(1.05); opacity: 0.4; }
+  50% { transform: scale(1.2); opacity: 0.7; }
+}
+
 html, body, #root {
   height: 100%;
   margin: 0;
