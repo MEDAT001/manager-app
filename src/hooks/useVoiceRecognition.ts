@@ -30,7 +30,7 @@ export function useVoiceRecognition(onResult: (text: string) => void) {
       const result = await navigator.permissions.query({ name: 'microphone' as PermissionName })
       return result.state === 'granted'
     } catch {
-      return true // permissions API not available, assume OK
+      return true
     }
   }, [])
 
@@ -44,7 +44,6 @@ export function useVoiceRecognition(onResult: (text: string) => void) {
       return
     }
 
-    // Check mic permission first
     const hasPermission = await checkMicPermission()
     if (!hasPermission) {
       const msg = 'Autorise le micro dans les paramètres du navigateur'
@@ -62,6 +61,7 @@ export function useVoiceRecognition(onResult: (text: string) => void) {
     recognition.lang = 'fr-FR'
     recognition.continuous = true
     recognition.interimResults = true
+    ;(recognition as any).maxAlternatives = 1
 
     recognition.onstart = () => {
       setState((s) => ({ ...s, isListening: true, transcript: '' }))
@@ -74,8 +74,10 @@ export function useVoiceRecognition(onResult: (text: string) => void) {
       let interimTranscript = ''
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript
-        if (event.results[i].isFinal) {
+        const result = event.results[i]
+        const transcript = result[0].transcript
+
+        if (result.isFinal) {
           finalTranscript += transcript
         } else {
           interimTranscript += transcript
