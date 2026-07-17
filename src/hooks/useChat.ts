@@ -19,8 +19,10 @@ export function useChat(options?: UseChatOptions) {
   const [error, setError] = useState<string | null>(null)
   const messagesRef = useRef<Message[]>([])
   const abortRef = useRef(false)
+  const onReplyRef = useRef(options?.onReply)
 
   messagesRef.current = messages
+  onReplyRef.current = options?.onReply
 
   const sendMessageToAPI = useCallback(async (content: string) => {
     const trimmed = content.trim()
@@ -73,8 +75,8 @@ export function useChat(options?: UseChatOptions) {
       setIsTyping(false)
       logger.info('Réponse complétée', { length: fullText.length })
 
-      if (!abortRef.current && options?.onReply) {
-        options.onReply(fullText)
+      if (!abortRef.current && onReplyRef.current) {
+        onReplyRef.current(fullText)
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erreur inconnue'
