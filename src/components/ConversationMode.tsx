@@ -5,6 +5,8 @@ interface Props {
   isSpeaking: boolean
   isListening: boolean
   transcription: string
+  voiceStatus: string
+  voiceError: string | null
   lastReply: string
   onBack: () => void
   onMicToggle: () => void
@@ -14,6 +16,8 @@ export function ConversationMode({
   isSpeaking,
   isListening,
   transcription,
+  voiceStatus,
+  voiceError,
   lastReply,
   onBack,
   onMicToggle,
@@ -71,16 +75,20 @@ export function ConversationMode({
           <span className="font-semibold text-text-primary text-[15px] tracking-tight block leading-tight">
             Samir
           </span>
-          <span className="text-[11px] text-mint font-medium flex items-center gap-1">
-            <span className="w-1.5 h-1.5 bg-mint rounded-full inline-block" />
-            {isSpeaking ? 'En train de parler...' : isListening ? 'Écoute...' : 'En ligne'}
+          <span className={`text-[11px] font-medium flex items-center gap-1 ${
+            isSpeaking ? 'text-primary' : isListening ? 'text-accent' : 'text-mint'
+          }`}>
+            <span className={`w-1.5 h-1.5 rounded-full inline-block ${
+              isSpeaking ? 'bg-primary' : isListening ? 'bg-accent' : 'bg-mint'
+            }`} />
+            {isSpeaking ? 'Samir parle...' : isListening ? 'Écoute...' : 'En ligne'}
           </span>
         </div>
       </header>
 
       <div className="flex-1 flex flex-col items-center justify-center px-6">
-        <div className="relative mb-10">
-          {/* Outer glow */}
+        {/* Orb */}
+        <div className="relative mb-8">
           <div
             className={`absolute -inset-8 rounded-full transition-all duration-700 ${
               isSpeaking
@@ -91,7 +99,6 @@ export function ConversationMode({
             }`}
           />
 
-          {/* Orb */}
           <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center shadow-lg shadow-primary/10">
             <div
               className={`absolute inset-2 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 transition-all duration-500 ${
@@ -107,7 +114,6 @@ export function ConversationMode({
             </div>
           </div>
 
-          {/* Listening indicator */}
           {isListening && !isSpeaking && (
             <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
               {[0, 1, 2].map((i) => (
@@ -121,17 +127,32 @@ export function ConversationMode({
           )}
         </div>
 
-        {/* Transcription area */}
+        {/* Status area */}
         <div className="w-full max-w-md text-center min-h-[120px]">
-          {displayedText ? (
+          {voiceError ? (
+            <div className="px-4 py-3 bg-danger/10 text-danger text-sm rounded-2xl">
+              {voiceError}
+              <button
+                onClick={onMicToggle}
+                className="block mx-auto mt-2 text-xs font-medium text-primary hover:underline"
+              >
+                Réessayer
+              </button>
+            </div>
+          ) : displayedText ? (
             <p className="text-lg text-text-primary leading-relaxed font-medium">
               {displayedText}
               {isTyping && <span className="inline-block w-0.5 h-5 bg-primary ml-1 animate-pulse align-text-bottom" />}
             </p>
           ) : isListening ? (
-            <p className="text-text-muted text-sm">
-              {transcription || 'Parle à Samir...'}
-            </p>
+            <div>
+              <p className="text-accent font-medium text-sm mb-1">{voiceStatus || 'Parle...'}</p>
+              {transcription && (
+                <p className="text-text-primary text-base italic">"{transcription}"</p>
+              )}
+            </div>
+          ) : voiceStatus ? (
+            <p className="text-text-muted text-sm">{voiceStatus}</p>
           ) : (
             <p className="text-text-muted text-sm">
               Appuie sur le micro pour commencer

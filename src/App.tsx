@@ -20,7 +20,6 @@ export default function App() {
   const voiceModeRef = useRef(voiceMode.isVoiceMode)
   voiceModeRef.current = voiceMode.isVoiceMode
 
-  const lastReplyRef = useRef('')
   const [lastReply, setLastReply] = useState('')
 
   const startListeningRef = useRef<() => void>(() => {})
@@ -28,7 +27,6 @@ export default function App() {
   const chat = useChat({
     onReply: mode === 'conversation' && voiceMode.isVoiceMode
       ? async (text) => {
-          lastReplyRef.current = text
           setLastReply(text)
           await speakRef.current(text)
           if (voiceModeRef.current) {
@@ -60,10 +58,9 @@ export default function App() {
     if (voice.isListening) {
       voice.stopListening()
     } else {
-      voiceMode.enable()
       voice.startListening()
     }
-  }, [voice, voiceMode])
+  }, [voice])
 
   const handleBackToSelect = useCallback(() => {
     chat.clearMessages()
@@ -71,7 +68,6 @@ export default function App() {
     if (voice.isListening) voice.stopListening()
     setMode('select')
     setLastReply('')
-    lastReplyRef.current = ''
   }, [chat, voiceMode, voice])
 
   // MODE SELECTION
@@ -86,6 +82,8 @@ export default function App() {
         isSpeaking={voiceMode.isSpeaking}
         isListening={voice.isListening}
         transcription={voice.transcript}
+        voiceStatus={voice.status}
+        voiceError={voice.error}
         lastReply={lastReply}
         onBack={handleBackToSelect}
         onMicToggle={handleMicToggle}
