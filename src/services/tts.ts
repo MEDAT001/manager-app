@@ -3,10 +3,10 @@ let currentSource: AudioBufferSourceNode | null = null
 
 // Premium French male voice IDs (ordered by preference)
 const FRENCH_VOICES = [
+  { id: 'jUHQdLfy668sllNiNTSW', name: 'Clément' },    // Middle-aged French male
   { id: 'CYR0HqHoZAUmoZsLWPob', name: 'Sébastien' },  // Warm, calm, narrative
   { id: '6kimG24ccauj1GNOEFjF', name: 'Benjamin' },    // Velvety, warm timbre
   { id: 'fz4G5jaMWUPbfs2rKKNy', name: 'Frédéric' },   // Confident, warm
-  { id: 'ckgFqgT4MZNQ3bggyZiF', name: 'Mathieu' },    // Deep, authoritative
   { id: 'pNInz6obpgDQGcFmaJgB', name: 'Adam' },        // Premade fallback, deep male
 ]
 
