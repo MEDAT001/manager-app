@@ -1,76 +1,56 @@
-import { logger } from '../lib/logger'
-
-let audioContext: AudioContext | null = null
-let currentSource: AudioBufferSourceNode | null = null
-
-function getAudioContext(): AudioContext {
-  if (!audioContext || audioContext.state === 'closed') {
-    audioContext = new AudioContext()
-  }
-  if (audioContext.state === 'suspended') {
-    audioContext.resume()
-  }
-  return audioContext
+function findFrenchVoice(): SpeechSynthesisVoice | null {
+  const voices = speechSynthesis.getVoices()
+  const french = voices.filter((v) => v.lang.startsWith('fr'))
+  if (french.length === 0) return null
+  const male = french.find((v) => v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('homme'))
+  return male || french[0]
 }
 
-export function initAudioContext(): void {
-  getAudioContext()
-}
-
-export async function synthesizeSpeech(text: string): Promise<ArrayBuffer> {
-  const truncated = text.length > 500 ? text.slice(0, 500) + '...' : text
-
-  logger.info('Synthèse vocale kokoro', { length: truncated.length })
-
-  const response = await fetch('/api/tts', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: truncated }),
-  })
-
-  if (!response.ok) {
-    const errBody = await response.text().catch(() => '')
-    logger.error('TTS failed', response.status, errBody)
-    throw new Error(`TTS failed: ${response.status}`)
-  }
-
-  return response.arrayBuffer()
+export function initSpeech(): void {
+  if (typeof window === 'undefined' || !window.speechSynthesis) return
+  speechSynthesis.getVoices()
+  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices()
 }
 
 export async function speak(text: string): Promise<void> {
   stopSpeaking()
 
-  const arrayBuffer = await synthesizeSpeech(text)
-  const ctx = getAudioContext()
-  const audioBuffer = await ctx.decodeAudioData(arrayBuffer)
-
   return new Promise((resolve, reject) => {
-    const source = ctx.createBufferSource()
-    source.buffer = audioBuffer
-    source.connect(ctx.destination)
-    currentSource = source
+    if (!window.speechSynthesis) {
+      reject(new Error('SpeechSynthesis non supporté'))
+      return
+    }
 
-    source.onended = () => {
-      currentSource = null
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.lang = 'fr-FR'
+    utterance.rate = 1.0
+    utterance.pitch = 0.9
+    utterance.volume = 1.0
+
+    const voice = findFrenchVoice()
+    if (voice) {
+      utterance.voice = voice
+      console.log('Using voice:', voice.name, voice.lang)
+    }
+
+    utterance.onend = () => {
       resolve()
     }
 
-    try {
-      source.start(0)
-    } catch (err) {
-      currentSource = null
-      reject(err)
+    utterance.onerror = (e) => {
+      if (e.error === 'canceled' || e.error === 'interrupted') {
+        resolve()
+      } else {
+        reject(new Error(`Speech error: ${e.error}`))
+      }
     }
+
+    speechSynthesis.speak(utterance)
   })
 }
 
 export function stopSpeaking(): void {
-  if (currentSource) {
-    try {
-      currentSource.stop()
-    } catch {
-      // already stopped
-    }
-    currentSource = null
+  if (window.speechSynthesis) {
+    speechSynthesis.cancel()
   }
 }
