@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react'
-import { RefreshCw, Volume2, VolumeX } from 'lucide-react'
+import { RefreshCw, MoreHorizontal } from 'lucide-react'
 import { ChatWindow } from './components/ChatWindow'
 import { ChatInput } from './components/ChatInput'
 import { useChat } from './hooks/useChat'
@@ -12,8 +12,19 @@ export default function App() {
   const speakRef = useRef(voiceMode.speakText)
   speakRef.current = voiceMode.speakText
 
+  const enableVoiceRef = useRef(voiceMode.enable)
+  enableVoiceRef.current = voiceMode.enable
+
   const chat = useChat({
-    onReply: voiceMode.isVoiceMode ? (text) => speakRef.current(text) : undefined,
+    onReply: voiceMode.isVoiceMode
+      ? async (text) => {
+          await speakRef.current(text)
+          // Auto-restart mic after speaking
+          if (voiceMode.isVoiceMode) {
+            setTimeout(() => enableVoiceRef.current(), 500)
+          }
+        }
+      : undefined,
   })
 
   const sendMessageRef = useRef(chat.sendMessage)
@@ -24,6 +35,15 @@ export default function App() {
   }, [])
 
   const voice = useVoiceRecognition(handleVoiceResult)
+
+  const handleMicToggle = useCallback(() => {
+    if (voice.isListening) {
+      voice.stopListening()
+    } else {
+      voiceMode.enable()
+      voice.startListening()
+    }
+  }, [voice, voiceMode])
 
   return (
     <div className="h-full flex flex-col bg-surface">
@@ -44,21 +64,13 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={voiceMode.toggle}
-            className={`p-2.5 rounded-xl transition-all duration-200 ${
-              voiceMode.isVoiceMode
-                ? 'bg-primary/10 text-primary shadow-sm'
-                : 'text-text-muted hover:bg-surface-hover hover:text-primary'
-            }`}
-            aria-label={voiceMode.isVoiceMode ? 'Mode silencieux' : 'Mode vocal'}
-            title={voiceMode.isVoiceMode ? 'Mode silencieux' : 'Mode conversation'}
-          >
-            {voiceMode.isVoiceMode ? <Volume2 size={16} /> : <VolumeX size={16} />}
-          </button>
           {chat.messages.length > 0 && (
             <button
-              onClick={chat.clearMessages}
+              onClick={() => {
+                chat.clearMessages()
+                voiceMode.disable()
+                if (voice.isListening) voice.stopListening()
+              }}
               className="p-2.5 rounded-xl text-text-muted hover:bg-surface-hover hover:text-primary transition-all duration-200"
               aria-label="Nouvelle conversation"
               title="Nouvelle conversation"
@@ -66,6 +78,9 @@ export default function App() {
               <RefreshCw size={16} />
             </button>
           )}
+          <button className="p-2.5 rounded-xl text-text-muted hover:bg-surface-hover transition-all duration-200">
+            <MoreHorizontal size={16} />
+          </button>
         </div>
       </header>
 
@@ -83,7 +98,7 @@ export default function App() {
         voiceEnabled={true}
         isListening={voice.isListening}
         isVoiceSupported={voice.isSupported}
-        onVoiceToggle={voice.isListening ? voice.stopListening : voice.startListening}
+        onVoiceToggle={handleMicToggle}
       />
     </div>
   )

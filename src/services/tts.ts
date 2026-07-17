@@ -1,7 +1,7 @@
 import { logger } from '../lib/logger'
 
 const TTS_MODEL = 'hexgrad/kokoro-82m'
-const TTS_VOICE = 'ff_heart'
+const TTS_VOICE = 'ff_siwis'
 const MAX_TEXT_LENGTH = 500
 
 export async function synthesizeSpeech(text: string): Promise<Blob> {

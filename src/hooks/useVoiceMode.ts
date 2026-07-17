@@ -1,24 +1,30 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback } from 'react'
 import { speak, stopSpeaking } from '../services/tts'
 
 export function useVoiceMode() {
   const [isVoiceMode, setIsVoiceMode] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
-  const abortRef = useRef(false)
+
+  const enable = useCallback(() => {
+    setIsVoiceMode(true)
+  }, [])
+
+  const disable = useCallback(() => {
+    setIsVoiceMode(false)
+    stopSpeaking()
+    setIsSpeaking(false)
+  }, [])
 
   const toggle = useCallback(() => {
-    setIsVoiceMode((prev) => {
-      if (prev) {
-        stopSpeaking()
-        setIsSpeaking(false)
-      }
-      return !prev
-    })
-  }, [])
+    if (isVoiceMode) {
+      disable()
+    } else {
+      enable()
+    }
+  }, [isVoiceMode, enable, disable])
 
   const speakText = useCallback(async (text: string) => {
     if (!text.trim()) return
-    abortRef.current = false
     setIsSpeaking(true)
     try {
       await speak(text)
@@ -29,11 +35,5 @@ export function useVoiceMode() {
     }
   }, [])
 
-  const stop = useCallback(() => {
-    abortRef.current = true
-    stopSpeaking()
-    setIsSpeaking(false)
-  }, [])
-
-  return { isVoiceMode, isSpeaking, toggle, speakText, stop }
+  return { isVoiceMode, isSpeaking, enable, disable, toggle, speakText }
 }
