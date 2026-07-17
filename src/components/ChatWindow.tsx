@@ -28,21 +28,6 @@ export function ChatWindow({ messages, isTyping }: Props) {
         <p className="text-sm text-text-secondary max-w-[280px] leading-relaxed">
           Ton coach personnel. Dis-moi ce qui t'amène et on avance ensemble.
         </p>
-
-        <div className="mt-8 flex flex-wrap gap-2 justify-center max-w-[320px]">
-          {[
-            "Je suis débordé au travail",
-            "J'ai un conflit avec un collègue",
-            "Je me sens bloqué",
-          ].map((suggestion) => (
-            <button
-              key={suggestion}
-              className="px-4 py-2.5 text-xs font-medium text-text-secondary bg-surface-card border border-border rounded-2xl shadow-sm hover:shadow-md hover:border-primary/30 hover:text-primary transition-all duration-200 cursor-pointer"
-            >
-              {suggestion}
-            </button>
-          ))}
-        </div>
       </div>
     )
   }
