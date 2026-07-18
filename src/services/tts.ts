@@ -1,13 +1,15 @@
 let audioContext: AudioContext | null = null
 let currentSource: AudioBufferSourceNode | null = null
+let audioQueue: AudioBuffer[] = []
+let isPlayingQueue = false
+let stopQueueFlag = false
 
-// Premium French male voice IDs (ordered by preference)
 const FRENCH_VOICES = [
-  { id: 'jUHQdLfy668sllNiNTSW', name: 'Clément' },    // Middle-aged French male
-  { id: 'CYR0HqHoZAUmoZsLWPob', name: 'Sébastien' },  // Warm, calm, narrative
-  { id: '6kimG24ccauj1GNOEFjF', name: 'Benjamin' },    // Velvety, warm timbre
-  { id: 'fz4G5jaMWUPbfs2rKKNy', name: 'Frédéric' },   // Confident, warm
-  { id: 'pNInz6obpgDQGcFmaJgB', name: 'Adam' },        // Premade fallback, deep male
+  { id: 'jUHQdLfy668sllNiNTSW', name: 'Clément' },
+  { id: 'CYR0HqHoZAUmoZsLWPob', name: 'Sébastien' },
+  { id: '6kimG24ccauj1GNOEFjF', name: 'Benjamin' },
+  { id: 'fz4G5jaMWUPbfs2rKKNy', name: 'Frédéric' },
+  { id: 'pNInz6obpgDQGcFmaJgB', name: 'Adam' },
 ]
 
 const VOICE_MODEL = 'eleven_multilingual_v2'
@@ -26,11 +28,8 @@ export function initAudioContext(): void {
   getAudioContext()
 }
 
-// PRIMARY: ElevenLabs via serverless
-async function speakElevenLabs(text: string): Promise<void> {
+async function fetchElevenLabs(text: string): Promise<ArrayBuffer> {
   const truncated = text.length > 5000 ? text.slice(0, 5000) + '...' : text
-
-  let lastError: Error | null = null
 
   for (const voice of FRENCH_VOICES) {
     try {
@@ -44,49 +43,92 @@ async function speakElevenLabs(text: string): Promise<void> {
         }),
       })
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
-      }
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
 
-      const arrayBuffer = await response.arrayBuffer()
-
-      if (arrayBuffer.byteLength < 1000) {
-        throw new Error('Audio trop petit')
-      }
-
-      const ctx = getAudioContext()
-      const audioBuffer = await ctx.decodeAudioData(arrayBuffer)
-
-      await new Promise<void>((resolve, reject) => {
-        const source = ctx.createBufferSource()
-        source.buffer = audioBuffer
-        source.connect(ctx.destination)
-        currentSource = source
-
-        source.onended = () => {
-          currentSource = null
-          resolve()
-        }
-
-        try {
-          source.start(0)
-        } catch (err) {
-          currentSource = null
-          reject(err)
-        }
-      })
-
-      return
-    } catch (err) {
-      lastError = err instanceof Error ? err : new Error(String(err))
+      const buf = await response.arrayBuffer()
+      if (buf.byteLength < 1000) throw new Error('Audio trop petit')
+      return buf
+    } catch {
       continue
     }
   }
 
-  throw lastError || new Error('All ElevenLabs voices failed')
+  throw new Error('All voices failed')
 }
 
-// FALLBACK: SpeechSynthesis navigateur
+async function playAudioBuffer(buffer: AudioBuffer): Promise<void> {
+  const ctx = getAudioContext()
+  return new Promise((resolve, reject) => {
+    const source = ctx.createBufferSource()
+    source.buffer = buffer
+    source.connect(ctx.destination)
+    currentSource = source
+
+    source.onended = () => {
+      currentSource = null
+      resolve()
+    }
+
+    try {
+      source.start(0)
+    } catch (err) {
+      currentSource = null
+      reject(err)
+    }
+  })
+}
+
+async function processQueue() {
+  if (isPlayingQueue) return
+  isPlayingQueue = true
+
+  while (audioQueue.length > 0 && !stopQueueFlag) {
+    const buffer = audioQueue.shift()!
+    try {
+      await playAudioBuffer(buffer)
+    } catch {
+      // skip failed segment
+    }
+  }
+
+  isPlayingQueue = false
+}
+
+// STREAMING: Add sentence to queue, plays in order
+export async function speakStream(text: string): Promise<void> {
+  if (stopQueueFlag) return
+  if (!text.trim()) return
+
+  try {
+    const arrayBuffer = await fetchElevenLabs(text)
+    const ctx = getAudioContext()
+    const audioBuffer = await ctx.decodeAudioData(arrayBuffer)
+    audioQueue.push(audioBuffer)
+    processQueue()
+  } catch (err) {
+    console.warn('TTS segment failed:', err)
+  }
+}
+
+// SINGLE: Play one text (used in chat mode)
+export async function speak(text: string): Promise<void> {
+  stopSpeaking()
+
+  try {
+    await speakElevenLabs(text)
+  } catch (err) {
+    console.warn('ElevenLabs failed, using fallback:', err)
+    await speakFallback(text)
+  }
+}
+
+async function speakElevenLabs(text: string): Promise<void> {
+  const arrayBuffer = await fetchElevenLabs(text)
+  const ctx = getAudioContext()
+  const audioBuffer = await ctx.decodeAudioData(arrayBuffer)
+  await playAudioBuffer(audioBuffer)
+}
+
 function speakFallback(text: string): Promise<void> {
   return new Promise((resolve, reject) => {
     if (!window.speechSynthesis) {
@@ -102,36 +144,23 @@ function speakFallback(text: string): Promise<void> {
 
     const voices = speechSynthesis.getVoices()
     const french = voices.filter((v) => v.lang.startsWith('fr'))
-    if (french.length > 0) {
-      utterance.voice = french[0]
-    }
+    if (french.length > 0) utterance.voice = french[0]
 
     utterance.onend = () => resolve()
     utterance.onerror = (e) => {
-      if (e.error === 'canceled' || e.error === 'interrupted') {
-        resolve()
-      } else {
-        reject(new Error(`Speech error: ${e.error}`))
-      }
+      if (e.error === 'canceled' || e.error === 'interrupted') resolve()
+      else reject(new Error(`Speech error: ${e.error}`))
     }
 
     speechSynthesis.speak(utterance)
   })
 }
 
-// MAIN: Try ElevenLabs, fallback to SpeechSynthesis
-export async function speak(text: string): Promise<void> {
-  stopSpeaking()
-
-  try {
-    await speakElevenLabs(text)
-  } catch (err) {
-    console.warn('ElevenLabs failed, using fallback:', err)
-    await speakFallback(text)
-  }
-}
-
 export function stopSpeaking(): void {
+  stopQueueFlag = true
+  audioQueue = []
+  isPlayingQueue = false
+
   if (currentSource) {
     try { currentSource.stop() } catch { /* already stopped */ }
     currentSource = null
@@ -139,4 +168,11 @@ export function stopSpeaking(): void {
   if (window.speechSynthesis) {
     speechSynthesis.cancel()
   }
+
+  // Reset flag after a tick so new speak calls work
+  setTimeout(() => { stopQueueFlag = false }, 50)
+}
+
+export function isCurrentlySpeaking(): boolean {
+  return currentSource !== null || isPlayingQueue
 }

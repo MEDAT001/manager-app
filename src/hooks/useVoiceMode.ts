@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { speak, stopSpeaking, initAudioContext } from '../services/tts'
+import { speak, speakStream, stopSpeaking, initAudioContext } from '../services/tts'
 
 export function useVoiceMode() {
   const [isVoiceMode, setIsVoiceMode] = useState(false)
@@ -30,12 +30,22 @@ export function useVoiceMode() {
     try {
       await speak(text)
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Erreur inconnue'
-      setTtsError(msg)
+      setTtsError(err instanceof Error ? err.message : 'Erreur inconnue')
     } finally {
       setIsSpeaking(false)
     }
   }, [])
 
-  return { isVoiceMode, isSpeaking, ttsError, enable, disable, speakText }
+  const speakTextStream = useCallback(async (text: string) => {
+    if (!text.trim()) return
+    setIsSpeaking(true)
+    setTtsError(null)
+    try {
+      await speakStream(text)
+    } catch (err) {
+      setTtsError(err instanceof Error ? err.message : 'Erreur inconnue')
+    }
+  }, [])
+
+  return { isVoiceMode, isSpeaking, ttsError, enable, disable, speakText, speakTextStream }
 }

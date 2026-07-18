@@ -14,6 +14,9 @@ export default function App() {
   const [mode, setMode] = useState<AppMode>('select')
   const voiceMode = useVoiceMode()
 
+  const speakStreamRef = useRef(voiceMode.speakTextStream)
+  speakStreamRef.current = voiceMode.speakTextStream
+
   const speakRef = useRef(voiceMode.speakText)
   speakRef.current = voiceMode.speakText
 
@@ -25,15 +28,22 @@ export default function App() {
   const stopListeningRef = useRef<() => void>(() => {})
 
   const chat = useChat({
+    onSentence: mode === 'conversation' && voiceMode.isVoiceMode
+      ? (sentence) => {
+          // Stream each sentence to TTS immediately
+          speakStreamRef.current(sentence)
+        }
+      : undefined,
     onReply: mode === 'conversation' && voiceMode.isVoiceMode
-      ? async (text) => {
+      ? async (fullText) => {
+          // Full response received - set last reply for display, then restart mic
           stopListeningRef.current()
-          setLastReply(text)
+          setLastReply(fullText)
           setIsThinking(false)
-          autoRestartRef.current = true
-          await speakRef.current(text)
+          // Wait for remaining audio to finish, then restart mic
+          await new Promise((r) => setTimeout(r, 1500))
           if (autoRestartRef.current) {
-            await startListeningRef.current()
+            startListeningRef.current()
           }
         }
       : undefined,

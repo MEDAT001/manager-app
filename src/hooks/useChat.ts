@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react'
 import type { Message } from '../lib/types'
-import { sendMessage } from '../services/openrouter'
+import { sendMessage, sendMessageStream } from '../services/openrouter'
 import { API } from '../lib/constants'
 import { logger } from '../lib/logger'
 
@@ -10,7 +10,7 @@ function uid(): string {
 
 interface UseChatOptions {
   onReply?: (text: string) => void
-  onThinking?: () => void
+  onSentence?: (sentence: string) => void
 }
 
 export function useChat(options?: UseChatOptions) {
@@ -21,11 +21,11 @@ export function useChat(options?: UseChatOptions) {
   const messagesRef = useRef<Message[]>([])
   const abortRef = useRef(false)
   const onReplyRef = useRef(options?.onReply)
-  const onThinkingRef = useRef(options?.onThinking)
+  const onSentenceRef = useRef(options?.onSentence)
 
   messagesRef.current = messages
   onReplyRef.current = options?.onReply
-  onThinkingRef.current = options?.onThinking
+  onSentenceRef.current = options?.onSentence
 
   const sendMessageToAPI = useCallback(async (content: string) => {
     const trimmed = content.trim()
@@ -55,32 +55,61 @@ export function useChat(options?: UseChatOptions) {
 
     try {
       const allMessages = [...messagesRef.current.slice(0, -1), userMsg]
-      onThinkingRef.current?.()
-      const fullText = await sendMessage(allMessages)
 
-      if (abortRef.current) return
+      // Streaming mode: yield sentences as they arrive
+      if (onSentenceRef.current) {
+        let fullText = ''
+        let sentenceBuffer = ''
+        setIsTyping(true)
 
-      const words = fullText.split(/(\s+)/)
-      let revealed = ''
+        for await (const sentence of sendMessageStream(allMessages)) {
+          if (abortRef.current) break
 
-      setIsTyping(true)
+          fullText += sentence + ' '
+          sentenceBuffer += sentence + ' '
 
-      for (let i = 0; i < words.length; i++) {
-        if (abortRef.current) break
-        revealed += words[i]
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantMsg.id ? { ...m, content: revealed } : m,
-          ),
-        )
-        await new Promise((r) => setTimeout(r, API.TYPING_DELAY_MS))
-      }
+          // Update message with revealed text
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMsg.id ? { ...m, content: fullText.trim() } : m,
+            ),
+          )
 
-      setIsTyping(false)
-      logger.info('Réponse complétée', { length: fullText.length })
+          // Send sentence to TTS immediately
+          onSentenceRef.current(sentence)
+        }
 
-      if (!abortRef.current && onReplyRef.current) {
-        onReplyRef.current(fullText)
+        setIsTyping(false)
+
+        if (!abortRef.current && onReplyRef.current) {
+          onReplyRef.current(fullText.trim())
+        }
+      } else {
+        // Non-streaming mode (chat mode)
+        const fullText = await sendMessage(allMessages)
+
+        if (abortRef.current) return
+
+        const words = fullText.split(/(\s+)/)
+        let revealed = ''
+        setIsTyping(true)
+
+        for (let i = 0; i < words.length; i++) {
+          if (abortRef.current) break
+          revealed += words[i]
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMsg.id ? { ...m, content: revealed } : m,
+            ),
+          )
+          await new Promise((r) => setTimeout(r, API.TYPING_DELAY_MS))
+        }
+
+        setIsTyping(false)
+
+        if (!abortRef.current && onReplyRef.current) {
+          onReplyRef.current(fullText)
+        }
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erreur inconnue'
