@@ -53,6 +53,7 @@ export default function App() {
   sendMessageRef.current = chat.sendMessage
 
   const handleVoiceResult = useCallback((text: string) => {
+    autoRestartRef.current = true
     setIsThinking(false)
     setLastReply('')
     sendMessageRef.current(text)
