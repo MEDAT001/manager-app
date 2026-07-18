@@ -6,8 +6,8 @@ let analyser: AnalyserNode | null = null
 let audioContext: AudioContext | null = null
 let silenceCheckInterval: ReturnType<typeof setInterval> | null = null
 
-const SILENCE_THRESHOLD = 12
-const SILENCE_TIMEOUT_MS = 2500
+const SILENCE_THRESHOLD = 10
+const SILENCE_TIMEOUT_MS = 5000
 let onSilenceCallback: (() => void) | null = null
 
 function cleanupStream() {
