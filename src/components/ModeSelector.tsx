@@ -46,23 +46,19 @@ export function ModeSelector({ onSelect }: Props) {
     <div className="h-full flex flex-col items-center justify-center px-6 relative overflow-hidden"
       style={{ background: '#0C0A09' }}>
 
-      {/* Warm gold ambient glow */}
       <div className="absolute w-[600px] h-[600px] rounded-full opacity-[0.035] blur-[150px] top-[-200px] left-[-150px]"
         style={{ background: 'radial-gradient(circle, #C9A96E, transparent)' }} />
       <div className="absolute w-[500px] h-[500px] rounded-full opacity-[0.025] blur-[150px] bottom-[-150px] right-[-100px]"
         style={{ background: 'radial-gradient(circle, #A67C52, transparent)' }} />
 
-      {/* Subtle texture overlay */}
       <div className="absolute inset-0 opacity-[0.015]"
         style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(201,169,110,0.5) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
 
-      {/* Top gold line */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-24 opacity-20"
         style={{ background: 'linear-gradient(to bottom, transparent, #C9A96E, transparent)' }} />
 
       <div className="relative z-10 text-center" style={{ animation: 'fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1)' }}>
-        {/* Logo */}
-        <div className="relative w-[100px] h-[100px] mx-auto mb-8">
+        <div className="relative w-[100px] h-[100px] mx-auto mb-10">
           <div className="absolute inset-[-2px] rounded-[32px] opacity-40"
             style={{ background: 'linear-gradient(135deg, #C9A96E, #E8D5A3, #A67C52, #C9A96E)' }}>
             <div className="w-full h-full rounded-[30px]" style={{ background: '#0C0A09' }} />
@@ -73,33 +69,12 @@ export function ModeSelector({ onSelect }: Props) {
           </div>
         </div>
 
-        {/* Subtitle */}
-        <span className="text-[10px] font-semibold tracking-[0.35em] uppercase block mb-4"
-          style={{ color: '#A67C52' }}>
-          Coach Premium
-        </span>
-
-        {/* Title */}
-        <h1 className="text-[32px] font-[800] tracking-[-0.02em] mb-2"
-          style={{ color: '#F5F0E8' }}>
-          Bonjour, je suis <span style={{
-            background: 'linear-gradient(135deg, #C9A96E, #E8D5A3, #A67C52)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}>Samir</span>.
-        </h1>
-        <p className="text-[14px] font-medium mb-12" style={{ color: 'rgba(245,240,232,0.3)' }}>
-          Coach de management pour l'hôtellerie
-        </p>
-
-        {/* Divider */}
-        <div className="flex items-center gap-4 mb-12 px-8">
+        <div className="flex items-center gap-4 mb-14 px-8">
           <div className="flex-1 h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(201,169,110,0.2))' }} />
-          <span className="text-[9px] font-semibold tracking-[0.3em] uppercase" style={{ color: 'rgba(166,124,82,0.4)' }}>Choisir</span>
+          <span className="text-[9px] font-semibold tracking-[0.3em] uppercase" style={{ color: 'rgba(166,124,82,0.4)', fontFamily: "'Cormorant Garamond', serif" }}>Choisir</span>
           <div className="flex-1 h-[1px]" style={{ background: 'linear-gradient(90deg, rgba(201,169,110,0.2), transparent)' }} />
         </div>
 
-        {/* Cards */}
         <div className="flex gap-4 max-w-[400px] w-full px-4">
           <button
             onClick={() => onSelect('chat')}
@@ -123,8 +98,8 @@ export function ModeSelector({ onSelect }: Props) {
               style={{ background: 'rgba(201,169,110,0.06)', border: '1px solid rgba(201,169,110,0.08)' }}>
               <GoldChatIcon />
             </div>
-            <span className="font-bold text-[16px] block mb-1" style={{ color: '#F5F0E8' }}>Chat</span>
-            <span className="text-[11px] leading-snug block" style={{ color: 'rgba(245,240,232,0.3)' }}>
+            <span className="block mb-1" style={{ color: '#F5F0E8', fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: '17px', letterSpacing: '-0.01em' }}>Discuter</span>
+            <span className="text-[11px] leading-snug block" style={{ color: 'rgba(245,240,232,0.3)', fontFamily: "'Cormorant Garamond', serif", fontWeight: 500, fontSize: '12px' }}>
               Écris et lis les réponses
             </span>
           </button>
@@ -151,8 +126,8 @@ export function ModeSelector({ onSelect }: Props) {
               style={{ background: 'rgba(201,169,110,0.06)', border: '1px solid rgba(201,169,110,0.08)' }}>
               <GoldMicIcon />
             </div>
-            <span className="font-bold text-[16px] block mb-1" style={{ color: '#F5F0E8' }}>Conversation</span>
-            <span className="text-[11px] leading-snug block" style={{ color: 'rgba(245,240,232,0.3)' }}>
+            <span className="block mb-1" style={{ color: '#F5F0E8', fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: '17px', letterSpacing: '-0.01em' }}>Appel vocal</span>
+            <span className="text-[11px] leading-snug block" style={{ color: 'rgba(245,240,232,0.3)', fontFamily: "'Cormorant Garamond', serif", fontWeight: 500, fontSize: '12px' }}>
               Parle et écoute Samir
             </span>
           </button>
