@@ -7,7 +7,7 @@ export const CREDITS = {
 } as const
 
 export const API = {
-  MODEL: 'mistralai/mistral-nemo',
+  MODEL: 'google/gemini-2.5-flash-lite',
   MAX_TOKENS: 1024,
   TEMPERATURE: 0.8,
   TYPING_DELAY_MS: 40,
