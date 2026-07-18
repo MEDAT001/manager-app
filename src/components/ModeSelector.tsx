@@ -69,11 +69,12 @@ export function ModeSelector({ onSelect }: Props) {
           </div>
         </div>
 
-        <div className="flex items-center gap-4 mb-14 px-8">
+        <div className="flex items-center gap-4 mb-2 px-8">
           <div className="flex-1 h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(212,185,122,0.45))' }} />
           <span className="text-[9px] font-semibold tracking-[0.3em] uppercase" style={{ color: '#D4B97A', fontFamily: "'Cormorant Garamond', serif" }}>Choisir</span>
           <div className="flex-1 h-[1px]" style={{ background: 'linear-gradient(90deg, rgba(212,185,122,0.45), transparent)' }} />
         </div>
+        <span className="text-[10px] font-semibold tracking-[0.25em] uppercase block mb-12" style={{ color: '#D4B97A', fontFamily: "'Cormorant Garamond', serif", opacity: 0.6 }}>Version beta</span>
 
         <div className="flex gap-4 max-w-[400px] w-full px-4">
           <button
