@@ -74,6 +74,11 @@
   50% { transform: scale(1.08); box-shadow: 0 6px 30px rgba(255,107,157,0.4); }
 }
 
+@keyframes pulse-gold {
+  0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(212,175,55,0.3); }
+  50% { transform: scale(1.08); box-shadow: 0 6px 30px rgba(212,175,55,0.45); }
+}
+
 /* Orb morphing animations */
 @keyframes orb-morph-1 {
   0%, 100% { border-radius: 42% 58% 55% 45% / 55% 42% 58% 45%; transform: rotate(0deg) scale(1); }

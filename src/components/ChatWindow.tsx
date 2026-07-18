@@ -17,14 +17,21 @@ export function ChatWindow({ messages, isTyping }: Props) {
   if (messages.length === 0) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
-        <div className="w-[88px] h-[88px] rounded-[28px] overflow-hidden mb-6 shadow-lg"
-          style={{ boxShadow: '0 12px 40px rgba(108,99,255,0.25)' }}>
-          <img src="/logo.png" alt="Samir" className="w-full h-full object-cover" />
+        <div className="relative w-[96px] h-[96px] mx-auto mb-8">
+          <div className="absolute inset-[-2px] rounded-[30px] opacity-50"
+            style={{ background: 'linear-gradient(135deg, #D4AF37, #F5D67B, #C9A84C)' }}>
+            <div className="w-full h-full rounded-[28px]" style={{ background: '#12101f' }} />
+          </div>
+          <div className="relative w-full h-full rounded-[28px] overflow-hidden"
+            style={{ boxShadow: '0 16px 48px rgba(212,175,55,0.15)' }}>
+            <img src="/logo.png" alt="Samir" className="w-full h-full object-cover" />
+          </div>
         </div>
-        <h2 className="text-xl font-bold text-text-primary mb-2 tracking-tight">
+        <h2 className="text-xl font-bold mb-2 tracking-tight" style={{ color: '#FFF8E7' }}>
           Salut, je suis Samir.
         </h2>
-        <p className="text-sm text-text-secondary max-w-[280px] leading-relaxed font-medium">
+        <p className="text-sm max-w-[280px] leading-relaxed font-medium"
+          style={{ color: 'rgba(255,248,231,0.35)' }}>
           Ton coach personnel. Dis-moi ce qui t'amène et on avance ensemble.
         </p>
       </div>

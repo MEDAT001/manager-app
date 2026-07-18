@@ -13,6 +13,17 @@ interface Props {
   onMicToggle: () => void
 }
 
+function GoldMicLarge() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="9" y="2" width="6" height="11" rx="3" stroke="currentColor" strokeWidth="2"/>
+      <path d="M5 10a7 7 0 0 0 14 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="12" y1="17" x2="12" y2="21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="9" y1="21" x2="15" y2="21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
 export function ConversationMode({
   isSpeaking,
   isListening,
@@ -64,41 +75,43 @@ export function ConversationMode({
 
   return (
     <div className="h-full flex flex-col relative overflow-hidden"
-      style={{ background: 'linear-gradient(165deg, #0f0c29 0%, #1a1145 40%, #24243e 100%)' }}>
+      style={{ background: 'linear-gradient(165deg, #0a0818 0%, #12101f 30%, #1a1635 60%, #0d0b1a 100%)' }}>
 
-      {/* Background orbs */}
-      <div className="absolute w-[300px] h-[300px] rounded-full opacity-20 blur-[100px] -top-24 -left-20"
-        style={{ background: '#6C63FF', animation: 'float 8s ease-in-out infinite' }} />
-      <div className="absolute w-[250px] h-[250px] rounded-full opacity-20 blur-[100px] -bottom-20 -right-16"
-        style={{ background: '#FF6B9D', animation: 'float 8s ease-in-out infinite 3s' }} />
+      {/* Gold radial accents */}
+      <div className="absolute w-[500px] h-[500px] rounded-full opacity-[0.03] blur-[120px] -top-32 -left-32"
+        style={{ background: 'radial-gradient(circle, #D4AF37, transparent)' }} />
+      <div className="absolute w-[400px] h-[400px] rounded-full opacity-[0.02] blur-[120px] -bottom-24 -right-24"
+        style={{ background: 'radial-gradient(circle, #C9A84C, transparent)' }} />
 
       {/* Header */}
-      <header className="flex items-center justify-between px-5 py-4 relative z-10">
+      <header className="flex items-center justify-between px-5 py-4 relative z-10"
+        style={{ borderBottom: '1px solid rgba(212,175,55,0.06)' }}>
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 hover:bg-white/10"
-            style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)' }}
+            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 hover:bg-white/5"
+            style={{ border: '1px solid rgba(212,175,55,0.12)', color: '#C9A84C' }}
             aria-label="Retour au choix"
           >
             <ArrowLeft size={16} />
           </button>
           <div>
-            <span className="font-bold text-white text-[15px] tracking-tight block leading-tight">
+            <span className="font-bold text-[15px] tracking-tight block leading-tight"
+              style={{ color: '#FFF8E7' }}>
               Samir
             </span>
             <span className={`text-[11px] font-semibold flex items-center gap-1.5 ${
-              isSpeaking ? 'text-[#8B83FF]' : isListening ? 'text-[#FF8FB8]' : 'text-[#43E97B]'
+              isSpeaking ? 'text-[#F5D67B]' : isListening ? 'text-[#D4AF37]' : 'text-[#C9A84C]'
             }`}>
               <span className={`w-1.5 h-1.5 rounded-full inline-block ${
-                isSpeaking ? 'bg-[#8B83FF] animate-pulse' : isListening ? 'bg-[#FF8FB8] animate-pulse' : 'bg-[#43E97B]'
+                isSpeaking ? 'bg-[#F5D67B] animate-pulse' : isListening ? 'bg-[#D4AF37] animate-pulse' : 'bg-[#C9A84C]'
               }`} />
               {isSpeaking ? 'Samir parle...' : isListening ? 'Écoute...' : isThinking ? 'Réfléchit...' : 'En ligne'}
             </span>
           </div>
         </div>
-        <div className="w-9 h-9 rounded-[10px] overflow-hidden shadow-lg"
-          style={{ boxShadow: '0 4px 16px rgba(108,99,255,0.3)' }}>
+        <div className="w-9 h-9 rounded-[10px] overflow-hidden"
+          style={{ boxShadow: '0 4px 16px rgba(212,175,55,0.15)' }}>
           <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
         </div>
       </header>
@@ -117,10 +130,11 @@ export function ConversationMode({
         <div className="w-full max-w-md text-center min-h-[120px]">
           {voiceError ? (
             <div className="px-5 py-4 rounded-2xl text-sm"
-              style={{ background: 'rgba(255,87,87,0.1)', color: '#FF5757', border: '1px solid rgba(255,87,87,0.2)' }}>
+              style={{ background: 'rgba(212,175,55,0.05)', color: '#F5D67B', border: '1px solid rgba(212,175,55,0.15)' }}>
               {voiceError}
               <button onClick={onMicToggle}
-                className="block mx-auto mt-2 text-xs font-semibold text-[#8B83FF] hover:underline">
+                className="block mx-auto mt-2 text-xs font-semibold hover:underline"
+                style={{ color: '#D4AF37' }}>
                 Réessayer
               </button>
             </div>
@@ -128,26 +142,32 @@ export function ConversationMode({
             <div className="flex items-center justify-center gap-3">
               <div className="flex gap-1.5">
                 {[0, 1, 2].map((i) => (
-                  <div key={i} className="w-2.5 h-2.5 bg-[#8B83FF] rounded-full animate-bounce"
-                    style={{ animationDelay: `${i * 0.15}s` }} />
+                  <div key={i} className="w-2.5 h-2.5 rounded-full animate-bounce"
+                    style={{ background: '#D4AF37', animationDelay: `${i * 0.15}s` }} />
                 ))}
               </div>
-              <span className="text-white/40 text-sm font-medium">Samir réfléchit...</span>
+              <span className="text-sm font-medium" style={{ color: 'rgba(255,248,231,0.35)' }}>
+                Samir réfléchit...
+              </span>
             </div>
           ) : displayedText ? (
-            <p className="text-xl text-white leading-relaxed font-semibold tracking-[-0.01em]">
+            <p className="text-xl leading-relaxed font-semibold tracking-[-0.01em]"
+              style={{ color: '#FFF8E7' }}>
               {displayedText}
-              {isTyping && <span className="inline-block w-0.5 h-5 bg-[#8B83FF] ml-1 animate-pulse align-text-bottom" />}
+              {isTyping && <span className="inline-block w-0.5 h-5 ml-1 animate-pulse align-text-bottom"
+                style={{ background: '#D4AF37' }} />}
             </p>
           ) : isListening ? (
             <div>
-              <p className="text-[#FF8FB8] font-semibold text-sm mb-2">Parle maintenant...</p>
+              <p className="font-semibold text-sm mb-2" style={{ color: '#D4AF37' }}>Parle maintenant...</p>
               {transcription && (
-                <p className="text-white/70 text-base italic">"{transcription}"</p>
+                <p className="text-base italic" style={{ color: 'rgba(255,248,231,0.5)' }}>"{transcription}"</p>
               )}
             </div>
           ) : (
-            <p className="text-white/40 text-[15px] font-medium">Appuie sur le micro pour commencer</p>
+            <p className="text-[15px] font-medium" style={{ color: 'rgba(255,248,231,0.3)' }}>
+              Appuie sur le micro pour commencer
+            </p>
           )}
         </div>
       </div>
@@ -157,33 +177,30 @@ export function ConversationMode({
         <button
           onClick={onMicToggle}
           disabled={isSpeaking || isThinking}
-          className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 ${
+          className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-500 ${
             isListening
               ? 'scale-110'
               : isSpeaking || isThinking
-                ? 'bg-white/10 text-white/30 cursor-not-allowed'
+                ? 'cursor-not-allowed'
                 : 'hover:scale-105'
           }`}
           style={{
             background: isListening
-              ? 'linear-gradient(135deg, #FF6B9D, #FF8FB8)'
+              ? 'linear-gradient(135deg, #D4AF37, #F5D67B)'
               : isSpeaking || isThinking
-                ? undefined
-                : 'linear-gradient(135deg, #6C63FF, #8B83FF)',
+                ? 'rgba(212,175,55,0.06)'
+                : 'linear-gradient(135deg, #D4AF37, #F5D67B)',
+            color: isListening ? '#0a0818' : isSpeaking || isThinking ? 'rgba(212,175,55,0.2)' : '#0a0818',
             boxShadow: isListening
-              ? '0 8px 32px rgba(255,107,157,0.4)'
+              ? '0 8px 40px rgba(212,175,55,0.35), 0 0 60px rgba(212,175,55,0.1)'
               : isSpeaking || isThinking
                 ? 'none'
-                : '0 8px 32px rgba(108,99,255,0.4)',
-            animation: isListening ? 'pulse-mic 1.5s ease-in-out infinite' : undefined,
+                : '0 8px 32px rgba(212,175,55,0.2)',
+            animation: isListening ? 'pulse-gold 1.5s ease-in-out infinite' : undefined,
           }}
           aria-label={isListening ? 'Arrêter' : 'Parler'}
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-            <line x1="12" x2="12" y1="19" y2="22" />
-          </svg>
+          <GoldMicLarge />
         </button>
       </div>
     </div>
