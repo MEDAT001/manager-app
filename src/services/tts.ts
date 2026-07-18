@@ -19,13 +19,25 @@ function getAudioContext(): AudioContext {
     audioContext = new AudioContext()
   }
   if (audioContext.state === 'suspended') {
-    audioContext.resume()
+    audioContext.resume().catch(() => {})
   }
   return audioContext
 }
 
 export function initAudioContext(): void {
-  getAudioContext()
+  const ctx = getAudioContext()
+  // Mobile browsers require user gesture to resume
+  if (ctx.state === 'suspended') {
+    const resume = () => {
+      ctx.resume().catch(() => {})
+      document.removeEventListener('touchstart', resume)
+      document.removeEventListener('click', resume)
+      document.removeEventListener('keydown', resume)
+    }
+    document.addEventListener('touchstart', resume, { once: true })
+    document.addEventListener('click', resume, { once: true })
+    document.addEventListener('keydown', resume, { once: true })
+  }
 }
 
 async function fetchElevenLabs(text: string): Promise<ArrayBuffer> {
@@ -58,6 +70,10 @@ async function fetchElevenLabs(text: string): Promise<ArrayBuffer> {
 
 async function playAudioBuffer(buffer: AudioBuffer): Promise<void> {
   const ctx = getAudioContext()
+  // Ensure context is running before playing
+  if (ctx.state === 'suspended') {
+    await ctx.resume()
+  }
   return new Promise((resolve, reject) => {
     const source = ctx.createBufferSource()
     source.buffer = buffer
@@ -65,14 +81,18 @@ async function playAudioBuffer(buffer: AudioBuffer): Promise<void> {
     currentSource = source
 
     source.onended = () => {
-      currentSource = null
+      if (currentSource === source) {
+        currentSource = null
+      }
       resolve()
     }
 
     try {
       source.start(0)
     } catch (err) {
-      currentSource = null
+      if (currentSource === source) {
+        currentSource = null
+      }
       reject(err)
     }
   })
@@ -101,8 +121,10 @@ export async function speakStream(text: string): Promise<void> {
 
   try {
     const arrayBuffer = await fetchElevenLabs(text)
+    if (stopQueueFlag) return
     const ctx = getAudioContext()
     const audioBuffer = await ctx.decodeAudioData(arrayBuffer)
+    if (stopQueueFlag) return
     audioQueue.push(audioBuffer)
     processQueue()
   } catch (err) {
@@ -135,6 +157,9 @@ function speakFallback(text: string): Promise<void> {
       reject(new Error('SpeechSynthesis non supporté'))
       return
     }
+
+    // Cancel any previous speech
+    speechSynthesis.cancel()
 
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.lang = 'fr-FR'
@@ -170,7 +195,7 @@ export function stopSpeaking(): void {
   }
 
   // Reset flag after a tick so new speak calls work
-  setTimeout(() => { stopQueueFlag = false }, 50)
+  setTimeout(() => { stopQueueFlag = false }, 100)
 }
 
 export function isCurrentlySpeaking(): boolean {

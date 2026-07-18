@@ -6,8 +6,8 @@ let analyser: AnalyserNode | null = null
 let audioContext: AudioContext | null = null
 let silenceCheckInterval: ReturnType<typeof setInterval> | null = null
 
-const SILENCE_THRESHOLD = 15
-const SILENCE_TIMEOUT_MS = 2000
+const SILENCE_THRESHOLD = 12
+const SILENCE_TIMEOUT_MS = 2500
 let onSilenceCallback: (() => void) | null = null
 
 function cleanupStream() {
@@ -25,33 +25,51 @@ function cleanupStream() {
 }
 
 function startSilenceDetection(stream: MediaStream) {
-  audioContext = new AudioContext()
-  const source = audioContext.createMediaStreamSource(stream)
-  analyser = audioContext.createAnalyser()
-  analyser.fftSize = 512
-  source.connect(analyser)
+  try {
+    audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+    const source = audioContext.createMediaStreamSource(stream)
+    analyser = audioContext.createAnalyser()
+    analyser.fftSize = 512
+    source.connect(analyser)
 
-  const dataArray = new Uint8Array(analyser.frequencyBinCount)
-  let hasSpoken = false
+    const dataArray = new Uint8Array(analyser.frequencyBinCount)
+    let hasSpoken = false
 
-  silenceCheckInterval = setInterval(() => {
-    if (!analyser) return
-    analyser.getByteFrequencyData(dataArray)
-    let sum = 0
-    for (let i = 0; i < dataArray.length; i++) sum += dataArray[i]
-    const avg = sum / dataArray.length
+    silenceCheckInterval = setInterval(() => {
+      if (!analyser) return
+      analyser.getByteFrequencyData(dataArray)
+      let sum = 0
+      for (let i = 0; i < dataArray.length; i++) sum += dataArray[i]
+      const avg = sum / dataArray.length
 
-    if (avg > SILENCE_THRESHOLD) {
-      hasSpoken = true
-      if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null }
-    } else if (hasSpoken) {
-      if (!silenceTimer) {
-        silenceTimer = setTimeout(() => {
-          if (onSilenceCallback) onSilenceCallback()
-        }, SILENCE_TIMEOUT_MS)
+      if (avg > SILENCE_THRESHOLD) {
+        hasSpoken = true
+        if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null }
+      } else if (hasSpoken) {
+        if (!silenceTimer) {
+          silenceTimer = setTimeout(() => {
+            if (onSilenceCallback) onSilenceCallback()
+          }, SILENCE_TIMEOUT_MS)
+        }
       }
-    }
-  }, 100)
+    }, 150)
+  } catch (err) {
+    console.warn('Silence detection failed:', err)
+  }
+}
+
+function getSupportedMimeType(): string {
+  const types = [
+    'audio/webm;codecs=opus',
+    'audio/webm',
+    'audio/mp4',
+    'audio/ogg;codecs=opus',
+    'audio/wav',
+  ]
+  for (const type of types) {
+    if (MediaRecorder.isTypeSupported(type)) return type
+  }
+  return 'audio/webm'
 }
 
 export async function startRecording(onSilence?: () => void): Promise<void> {
@@ -61,20 +79,19 @@ export async function startRecording(onSilence?: () => void): Promise<void> {
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: {
       channelCount: 1,
-      sampleRate: 16000,
       echoCancellation: true,
       noiseSuppression: true,
+      autoGainControl: true,
     },
   })
 
   currentStream = stream
   audioChunks = []
 
-  const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-    ? 'audio/webm;codecs=opus'
-    : 'audio/webm'
+  const mimeType = getSupportedMimeType()
+  const options = mimeType ? { mimeType } : undefined
 
-  mediaRecorder = new MediaRecorder(stream, { mimeType })
+  mediaRecorder = new MediaRecorder(stream, options)
 
   mediaRecorder.ondataavailable = (event) => {
     if (event.data.size > 0) {
@@ -82,7 +99,9 @@ export async function startRecording(onSilence?: () => void): Promise<void> {
     }
   }
 
-  mediaRecorder.start(250)
+  // Use 500ms intervals on mobile for more stable recording
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+  mediaRecorder.start(isMobile ? 500 : 250)
   startSilenceDetection(stream)
 }
 
@@ -105,12 +124,12 @@ export async function stopRecording(): Promise<string> {
 
       try {
         const blob = new Blob(chunks, { type: mime })
-        if (blob.size < 1000) {
+        if (blob.size < 500) {
           resolve('')
           return
         }
         const base64 = await blobToBase64(blob)
-        const format = mime.includes('webm') ? 'webm' : 'mp3'
+        const format = mime.includes('webm') ? 'webm' : mime.includes('mp4') ? 'mp4' : 'mp3'
         const text = await transcribe(base64, format)
         resolve(text)
       } catch (err) {

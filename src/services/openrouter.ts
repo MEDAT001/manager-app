@@ -132,7 +132,7 @@ export async function* sendMessageStream(messages: Message[]): AsyncGenerator<st
           fullText += delta
 
           // Check if we have a complete sentence
-          const sentenceMatch = fullText.match(/^(.*?[.!?…])\s/s)
+          const sentenceMatch = fullText.match(/^(.*?[.!?…:])\s/s)
           if (sentenceMatch) {
             const sentence = sentenceMatch[1].trim()
             fullText = fullText.slice(sentenceMatch[0].length)

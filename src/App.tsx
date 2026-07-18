@@ -7,6 +7,7 @@ import { ConversationMode } from './components/ConversationMode'
 import { useChat } from './hooks/useChat'
 import { useVoiceRecognition } from './hooks/useVoiceRecognition'
 import { useVoiceMode } from './hooks/useVoiceMode'
+import { isCurrentlySpeaking } from './services/tts'
 
 type AppMode = 'select' | 'chat' | 'conversation'
 
@@ -30,18 +31,25 @@ export default function App() {
   const chat = useChat({
     onSentence: mode === 'conversation' && voiceMode.isVoiceMode
       ? (sentence) => {
-          // Stream each sentence to TTS immediately
           speakStreamRef.current(sentence)
         }
       : undefined,
     onReply: mode === 'conversation' && voiceMode.isVoiceMode
       ? async (fullText) => {
-          // Full response received - set last reply for display, then restart mic
           stopListeningRef.current()
           setLastReply(fullText)
           setIsThinking(false)
-          // Wait for remaining audio to finish, then restart mic
-          await new Promise((r) => setTimeout(r, 1500))
+          // Wait for TTS to finish before restarting mic
+          await new Promise<void>((resolve) => {
+            let checks = 0
+            const interval = setInterval(() => {
+              checks++
+              if (!isCurrentlySpeaking() || checks > 40) {
+                clearInterval(interval)
+                resolve()
+              }
+            }, 250)
+          })
           if (autoRestartRef.current) {
             startListeningRef.current()
           }
