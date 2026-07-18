@@ -70,9 +70,9 @@ export function ModeSelector({ onSelect }: Props) {
         </div>
 
         <div className="flex items-center gap-4 mb-14 px-8">
-          <div className="flex-1 h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(201,169,110,0.2))' }} />
-          <span className="text-[9px] font-semibold tracking-[0.3em] uppercase" style={{ color: 'rgba(166,124,82,0.4)', fontFamily: "'Cormorant Garamond', serif" }}>Choisir</span>
-          <div className="flex-1 h-[1px]" style={{ background: 'linear-gradient(90deg, rgba(201,169,110,0.2), transparent)' }} />
+          <div className="flex-1 h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(212,185,122,0.45))' }} />
+          <span className="text-[9px] font-semibold tracking-[0.3em] uppercase" style={{ color: '#D4B97A', fontFamily: "'Cormorant Garamond', serif" }}>Choisir</span>
+          <div className="flex-1 h-[1px]" style={{ background: 'linear-gradient(90deg, rgba(212,185,122,0.45), transparent)' }} />
         </div>
 
         <div className="flex gap-4 max-w-[400px] w-full px-4">
