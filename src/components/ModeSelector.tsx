@@ -14,9 +14,9 @@ function GoldChatIcon() {
       <circle cx="16" cy="11.5" r="1" fill="url(#gold1)"/>
       <defs>
         <linearGradient id="gold1" x1="3" y1="3" x2="21" y2="21">
-          <stop stopColor="#D4AF37"/>
-          <stop offset="0.5" stopColor="#F5D67B"/>
-          <stop offset="1" stopColor="#C9A84C"/>
+          <stop stopColor="#C9A96E"/>
+          <stop offset="0.5" stopColor="#E8D5A3"/>
+          <stop offset="1" stopColor="#A67C52"/>
         </linearGradient>
       </defs>
     </svg>
@@ -32,9 +32,9 @@ function GoldMicIcon() {
       <line x1="9" y1="21" x2="15" y2="21" stroke="url(#gold2)" strokeWidth="1.5" strokeLinecap="round"/>
       <defs>
         <linearGradient id="gold2" x1="5" y1="2" x2="19" y2="21">
-          <stop stopColor="#D4AF37"/>
-          <stop offset="0.5" stopColor="#F5D67B"/>
-          <stop offset="1" stopColor="#C9A84C"/>
+          <stop stopColor="#C9A96E"/>
+          <stop offset="0.5" stopColor="#E8D5A3"/>
+          <stop offset="1" stopColor="#A67C52"/>
         </linearGradient>
       </defs>
     </svg>
@@ -44,110 +44,115 @@ function GoldMicIcon() {
 export function ModeSelector({ onSelect }: Props) {
   return (
     <div className="h-full flex flex-col items-center justify-center px-6 relative overflow-hidden"
-      style={{ background: 'linear-gradient(165deg, #2c3e50 0%, #34495e 30%, #4a6274 60%, #2c3e50 100%)' }}>
+      style={{ background: '#0C0A09' }}>
 
-      {/* Subtle blue radial accents */}
-      <div className="absolute w-[500px] h-[500px] rounded-full opacity-[0.08] blur-[120px] top-[-150px] left-[-100px]"
-        style={{ background: 'radial-gradient(circle, #5dade2, transparent)' }} />
-      <div className="absolute w-[400px] h-[400px] rounded-full opacity-[0.06] blur-[120px] bottom-[-100px] right-[-80px]"
-        style={{ background: 'radial-gradient(circle, #85c1e9, transparent)' }} />
+      {/* Warm gold ambient glow */}
+      <div className="absolute w-[600px] h-[600px] rounded-full opacity-[0.035] blur-[150px] top-[-200px] left-[-150px]"
+        style={{ background: 'radial-gradient(circle, #C9A96E, transparent)' }} />
+      <div className="absolute w-[500px] h-[500px] rounded-full opacity-[0.025] blur-[150px] bottom-[-150px] right-[-100px]"
+        style={{ background: 'radial-gradient(circle, #A67C52, transparent)' }} />
 
-      {/* Decorative blue line */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-20 opacity-30"
-        style={{ background: 'linear-gradient(to bottom, transparent, #85c1e9, transparent)' }} />
+      {/* Subtle texture overlay */}
+      <div className="absolute inset-0 opacity-[0.015]"
+        style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(201,169,110,0.5) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+
+      {/* Top gold line */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-24 opacity-20"
+        style={{ background: 'linear-gradient(to bottom, transparent, #C9A96E, transparent)' }} />
 
       <div className="relative z-10 text-center" style={{ animation: 'fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1)' }}>
-        {/* Logo with blue frame */}
-        <div className="relative w-[110px] h-[110px] mx-auto mb-10">
-          <div className="absolute inset-[-3px] rounded-[36px] opacity-50"
-            style={{ background: 'linear-gradient(135deg, #5dade2, #85c1e9, #aed6f1, #5dade2)', padding: '2px' }}>
-            <div className="w-full h-full rounded-[34px]" style={{ background: '#2c3e50' }} />
+        {/* Logo */}
+        <div className="relative w-[100px] h-[100px] mx-auto mb-8">
+          <div className="absolute inset-[-2px] rounded-[32px] opacity-40"
+            style={{ background: 'linear-gradient(135deg, #C9A96E, #E8D5A3, #A67C52, #C9A96E)' }}>
+            <div className="w-full h-full rounded-[30px]" style={{ background: '#0C0A09' }} />
           </div>
-          <div className="relative w-full h-full rounded-[34px] overflow-hidden"
-            style={{ boxShadow: '0 20px 60px rgba(93, 173, 226, 0.2), 0 0 80px rgba(93, 173, 226, 0.05)' }}>
+          <div className="relative w-full h-full rounded-[30px] overflow-hidden"
+            style={{ boxShadow: '0 20px 60px rgba(201,169,110,0.15)' }}>
             <img src="/logo.png" alt="Manager Pro" className="w-full h-full object-cover" />
           </div>
         </div>
 
+        {/* Subtitle */}
+        <span className="text-[10px] font-semibold tracking-[0.35em] uppercase block mb-4"
+          style={{ color: '#A67C52' }}>
+          Coach Premium
+        </span>
+
         {/* Title */}
-        <div className="mb-3">
-          <span className="text-[11px] font-semibold tracking-[0.3em] uppercase mb-4 block"
-            style={{ color: '#aed6f1' }}>
-            Votre coach personnel
-          </span>
-        </div>
-        <h1 className="text-[34px] font-[800] tracking-[-0.03em] mb-3"
-          style={{ color: '#ecf0f1' }}>
+        <h1 className="text-[32px] font-[800] tracking-[-0.02em] mb-2"
+          style={{ color: '#F5F0E8' }}>
           Bonjour, je suis <span style={{
-            background: 'linear-gradient(135deg, #5dade2, #85c1e9, #aed6f1)',
+            background: 'linear-gradient(135deg, #C9A96E, #E8D5A3, #A67C52)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
           }}>Samir</span>.
         </h1>
-        <p className="text-[15px] font-medium mb-14" style={{ color: 'rgba(236,240,241,0.4)' }}>
+        <p className="text-[14px] font-medium mb-12" style={{ color: 'rgba(245,240,232,0.3)' }}>
           Coach de management pour l'hôtellerie
         </p>
 
-        {/* Mode cards */}
-        <div className="flex gap-5 max-w-[440px] w-full px-6">
+        {/* Divider */}
+        <div className="flex items-center gap-4 mb-12 px-8">
+          <div className="flex-1 h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(201,169,110,0.2))' }} />
+          <span className="text-[9px] font-semibold tracking-[0.3em] uppercase" style={{ color: 'rgba(166,124,82,0.4)' }}>Choisir</span>
+          <div className="flex-1 h-[1px]" style={{ background: 'linear-gradient(90deg, rgba(201,169,110,0.2), transparent)' }} />
+        </div>
+
+        {/* Cards */}
+        <div className="flex gap-4 max-w-[400px] w-full px-4">
           <button
             onClick={() => onSelect('chat')}
-            className="flex-1 p-8 rounded-[24px] text-center cursor-pointer transition-all duration-500 hover:-translate-y-1.5 group relative overflow-hidden"
+            className="flex-1 p-7 rounded-[20px] text-center cursor-pointer transition-all duration-500 hover:-translate-y-1"
             style={{
-              border: '1px solid rgba(93,173,226,0.12)',
-              background: 'rgba(93,173,226,0.04)',
-              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(201,169,110,0.08)',
+              background: 'rgba(201,169,110,0.02)',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(93,173,226,0.35)'
-              e.currentTarget.style.background = 'rgba(93,173,226,0.1)'
-              e.currentTarget.style.boxShadow = '0 20px 50px rgba(93,173,226,0.15), inset 0 1px 0 rgba(174,214,241,0.1)'
+              e.currentTarget.style.borderColor = 'rgba(201,169,110,0.25)'
+              e.currentTarget.style.background = 'rgba(201,169,110,0.06)'
+              e.currentTarget.style.boxShadow = '0 20px 50px rgba(201,169,110,0.08)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(93,173,226,0.12)'
-              e.currentTarget.style.background = 'rgba(93,173,226,0.04)'
+              e.currentTarget.style.borderColor = 'rgba(201,169,110,0.08)'
+              e.currentTarget.style.background = 'rgba(201,169,110,0.02)'
               e.currentTarget.style.boxShadow = 'none'
             }}
           >
-            <div className="w-16 h-16 rounded-[20px] flex items-center justify-center mx-auto mb-5"
-              style={{ background: 'linear-gradient(135deg, rgba(93,173,226,0.15), rgba(93,173,226,0.05))' }}>
+            <div className="w-14 h-14 rounded-[16px] flex items-center justify-center mx-auto mb-4"
+              style={{ background: 'rgba(201,169,110,0.06)', border: '1px solid rgba(201,169,110,0.08)' }}>
               <GoldChatIcon />
             </div>
-            <span className="font-bold text-[17px] block mb-1.5"
-              style={{ color: '#ecf0f1' }}>Chat</span>
-            <span className="text-[12px] leading-snug block"
-              style={{ color: 'rgba(236,240,241,0.4)' }}>
+            <span className="font-bold text-[16px] block mb-1" style={{ color: '#F5F0E8' }}>Chat</span>
+            <span className="text-[11px] leading-snug block" style={{ color: 'rgba(245,240,232,0.3)' }}>
               Écris et lis les réponses
             </span>
           </button>
 
           <button
             onClick={() => onSelect('conversation')}
-            className="flex-1 p-8 rounded-[24px] text-center cursor-pointer transition-all duration-500 hover:-translate-y-1.5 group relative overflow-hidden"
+            className="flex-1 p-7 rounded-[20px] text-center cursor-pointer transition-all duration-500 hover:-translate-y-1"
             style={{
-              border: '1px solid rgba(93,173,226,0.12)',
-              background: 'rgba(93,173,226,0.04)',
-              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(201,169,110,0.08)',
+              background: 'rgba(201,169,110,0.02)',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(93,173,226,0.35)'
-              e.currentTarget.style.background = 'rgba(93,173,226,0.1)'
-              e.currentTarget.style.boxShadow = '0 20px 50px rgba(93,173,226,0.15), inset 0 1px 0 rgba(174,214,241,0.1)'
+              e.currentTarget.style.borderColor = 'rgba(201,169,110,0.25)'
+              e.currentTarget.style.background = 'rgba(201,169,110,0.06)'
+              e.currentTarget.style.boxShadow = '0 20px 50px rgba(201,169,110,0.08)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(93,173,226,0.12)'
-              e.currentTarget.style.background = 'rgba(93,173,226,0.04)'
+              e.currentTarget.style.borderColor = 'rgba(201,169,110,0.08)'
+              e.currentTarget.style.background = 'rgba(201,169,110,0.02)'
               e.currentTarget.style.boxShadow = 'none'
             }}
           >
-            <div className="w-16 h-16 rounded-[20px] flex items-center justify-center mx-auto mb-5"
-              style={{ background: 'linear-gradient(135deg, rgba(93,173,226,0.15), rgba(93,173,226,0.05))' }}>
+            <div className="w-14 h-14 rounded-[16px] flex items-center justify-center mx-auto mb-4"
+              style={{ background: 'rgba(201,169,110,0.06)', border: '1px solid rgba(201,169,110,0.08)' }}>
               <GoldMicIcon />
             </div>
-            <span className="font-bold text-[17px] block mb-1.5"
-              style={{ color: '#ecf0f1' }}>Conversation</span>
-            <span className="text-[12px] leading-snug block"
-              style={{ color: 'rgba(236,240,241,0.4)' }}>
+            <span className="font-bold text-[16px] block mb-1" style={{ color: '#F5F0E8' }}>Conversation</span>
+            <span className="text-[11px] leading-snug block" style={{ color: 'rgba(245,240,232,0.3)' }}>
               Parle et écoute Samir
             </span>
           </button>
