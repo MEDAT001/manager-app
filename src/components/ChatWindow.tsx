@@ -17,15 +17,14 @@ export function ChatWindow({ messages, isTyping }: Props) {
   if (messages.length === 0) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
-        <div className="w-20 h-20 rounded-[28px] bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center mb-5 shadow-inner">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center shadow-lg shadow-primary/30">
-            <span className="text-white font-bold text-lg">S</span>
-          </div>
+        <div className="w-[88px] h-[88px] rounded-[28px] overflow-hidden mb-6 shadow-lg"
+          style={{ boxShadow: '0 12px 40px rgba(108,99,255,0.25)' }}>
+          <img src="/logo.png" alt="Samir" className="w-full h-full object-cover" />
         </div>
-        <h2 className="text-xl font-semibold text-text-primary mb-2 tracking-tight">
+        <h2 className="text-xl font-bold text-text-primary mb-2 tracking-tight">
           Salut, je suis Samir.
         </h2>
-        <p className="text-sm text-text-secondary max-w-[280px] leading-relaxed">
+        <p className="text-sm text-text-secondary max-w-[280px] leading-relaxed font-medium">
           Ton coach personnel. Dis-moi ce qui t'amène et on avance ensemble.
         </p>
       </div>
