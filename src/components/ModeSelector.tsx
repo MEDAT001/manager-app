@@ -44,27 +44,27 @@ function GoldMicIcon() {
 export function ModeSelector({ onSelect }: Props) {
   return (
     <div className="h-full flex flex-col items-center justify-center px-6 relative overflow-hidden"
-      style={{ background: 'linear-gradient(165deg, #0a0818 0%, #12101f 30%, #1a1635 60%, #0d0b1a 100%)' }}>
+      style={{ background: 'linear-gradient(165deg, #2c3e50 0%, #34495e 30%, #4a6274 60%, #2c3e50 100%)' }}>
 
-      {/* Subtle gold radial accents */}
-      <div className="absolute w-[500px] h-[500px] rounded-full opacity-[0.04] blur-[120px] top-[-150px] left-[-100px]"
-        style={{ background: 'radial-gradient(circle, #D4AF37, transparent)' }} />
-      <div className="absolute w-[400px] h-[400px] rounded-full opacity-[0.03] blur-[120px] bottom-[-100px] right-[-80px]"
-        style={{ background: 'radial-gradient(circle, #C9A84C, transparent)' }} />
+      {/* Subtle blue radial accents */}
+      <div className="absolute w-[500px] h-[500px] rounded-full opacity-[0.08] blur-[120px] top-[-150px] left-[-100px]"
+        style={{ background: 'radial-gradient(circle, #5dade2, transparent)' }} />
+      <div className="absolute w-[400px] h-[400px] rounded-full opacity-[0.06] blur-[120px] bottom-[-100px] right-[-80px]"
+        style={{ background: 'radial-gradient(circle, #85c1e9, transparent)' }} />
 
-      {/* Decorative gold line */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-20 opacity-20"
-        style={{ background: 'linear-gradient(to bottom, transparent, #D4AF37, transparent)' }} />
+      {/* Decorative blue line */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-20 opacity-30"
+        style={{ background: 'linear-gradient(to bottom, transparent, #85c1e9, transparent)' }} />
 
       <div className="relative z-10 text-center" style={{ animation: 'fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1)' }}>
-        {/* Logo with gold frame */}
+        {/* Logo with blue frame */}
         <div className="relative w-[110px] h-[110px] mx-auto mb-10">
-          <div className="absolute inset-[-3px] rounded-[36px] opacity-60"
-            style={{ background: 'linear-gradient(135deg, #D4AF37, #F5D67B, #C9A84C, #D4AF37)', padding: '2px' }}>
-            <div className="w-full h-full rounded-[34px]" style={{ background: '#0a0818' }} />
+          <div className="absolute inset-[-3px] rounded-[36px] opacity-50"
+            style={{ background: 'linear-gradient(135deg, #5dade2, #85c1e9, #aed6f1, #5dade2)', padding: '2px' }}>
+            <div className="w-full h-full rounded-[34px]" style={{ background: '#2c3e50' }} />
           </div>
           <div className="relative w-full h-full rounded-[34px] overflow-hidden"
-            style={{ boxShadow: '0 20px 60px rgba(212, 175, 55, 0.2), 0 0 80px rgba(212, 175, 55, 0.05)' }}>
+            style={{ boxShadow: '0 20px 60px rgba(93, 173, 226, 0.2), 0 0 80px rgba(93, 173, 226, 0.05)' }}>
             <img src="/logo.png" alt="Manager Pro" className="w-full h-full object-cover" />
           </div>
         </div>
@@ -72,19 +72,19 @@ export function ModeSelector({ onSelect }: Props) {
         {/* Title */}
         <div className="mb-3">
           <span className="text-[11px] font-semibold tracking-[0.3em] uppercase mb-4 block"
-            style={{ color: '#C9A84C' }}>
+            style={{ color: '#aed6f1' }}>
             Votre coach personnel
           </span>
         </div>
         <h1 className="text-[34px] font-[800] tracking-[-0.03em] mb-3"
-          style={{ color: '#FFF8E7' }}>
+          style={{ color: '#ecf0f1' }}>
           Bonjour, je suis <span style={{
-            background: 'linear-gradient(135deg, #D4AF37, #F5D67B, #C9A84C)',
+            background: 'linear-gradient(135deg, #5dade2, #85c1e9, #aed6f1)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
           }}>Samir</span>.
         </h1>
-        <p className="text-[15px] font-medium mb-14" style={{ color: 'rgba(255,248,231,0.35)' }}>
+        <p className="text-[15px] font-medium mb-14" style={{ color: 'rgba(236,240,241,0.4)' }}>
           Coach de management pour l'hôtellerie
         </p>
 
@@ -94,29 +94,29 @@ export function ModeSelector({ onSelect }: Props) {
             onClick={() => onSelect('chat')}
             className="flex-1 p-8 rounded-[24px] text-center cursor-pointer transition-all duration-500 hover:-translate-y-1.5 group relative overflow-hidden"
             style={{
-              border: '1px solid rgba(212,175,55,0.12)',
-              background: 'rgba(212,175,55,0.03)',
+              border: '1px solid rgba(93,173,226,0.12)',
+              background: 'rgba(93,173,226,0.04)',
               backdropFilter: 'blur(20px)',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(212,175,55,0.35)'
-              e.currentTarget.style.background = 'rgba(212,175,55,0.08)'
-              e.currentTarget.style.boxShadow = '0 20px 50px rgba(212,175,55,0.12), inset 0 1px 0 rgba(245,214,123,0.1)'
+              e.currentTarget.style.borderColor = 'rgba(93,173,226,0.35)'
+              e.currentTarget.style.background = 'rgba(93,173,226,0.1)'
+              e.currentTarget.style.boxShadow = '0 20px 50px rgba(93,173,226,0.15), inset 0 1px 0 rgba(174,214,241,0.1)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(212,175,55,0.12)'
-              e.currentTarget.style.background = 'rgba(212,175,55,0.03)'
+              e.currentTarget.style.borderColor = 'rgba(93,173,226,0.12)'
+              e.currentTarget.style.background = 'rgba(93,173,226,0.04)'
               e.currentTarget.style.boxShadow = 'none'
             }}
           >
             <div className="w-16 h-16 rounded-[20px] flex items-center justify-center mx-auto mb-5"
-              style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.12), rgba(212,175,55,0.04))' }}>
+              style={{ background: 'linear-gradient(135deg, rgba(93,173,226,0.15), rgba(93,173,226,0.05))' }}>
               <GoldChatIcon />
             </div>
             <span className="font-bold text-[17px] block mb-1.5"
-              style={{ color: '#FFF8E7' }}>Chat</span>
+              style={{ color: '#ecf0f1' }}>Chat</span>
             <span className="text-[12px] leading-snug block"
-              style={{ color: 'rgba(255,248,231,0.35)' }}>
+              style={{ color: 'rgba(236,240,241,0.4)' }}>
               Écris et lis les réponses
             </span>
           </button>
@@ -125,29 +125,29 @@ export function ModeSelector({ onSelect }: Props) {
             onClick={() => onSelect('conversation')}
             className="flex-1 p-8 rounded-[24px] text-center cursor-pointer transition-all duration-500 hover:-translate-y-1.5 group relative overflow-hidden"
             style={{
-              border: '1px solid rgba(212,175,55,0.12)',
-              background: 'rgba(212,175,55,0.03)',
+              border: '1px solid rgba(93,173,226,0.12)',
+              background: 'rgba(93,173,226,0.04)',
               backdropFilter: 'blur(20px)',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(212,175,55,0.35)'
-              e.currentTarget.style.background = 'rgba(212,175,55,0.08)'
-              e.currentTarget.style.boxShadow = '0 20px 50px rgba(212,175,55,0.12), inset 0 1px 0 rgba(245,214,123,0.1)'
+              e.currentTarget.style.borderColor = 'rgba(93,173,226,0.35)'
+              e.currentTarget.style.background = 'rgba(93,173,226,0.1)'
+              e.currentTarget.style.boxShadow = '0 20px 50px rgba(93,173,226,0.15), inset 0 1px 0 rgba(174,214,241,0.1)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(212,175,55,0.12)'
-              e.currentTarget.style.background = 'rgba(212,175,55,0.03)'
+              e.currentTarget.style.borderColor = 'rgba(93,173,226,0.12)'
+              e.currentTarget.style.background = 'rgba(93,173,226,0.04)'
               e.currentTarget.style.boxShadow = 'none'
             }}
           >
             <div className="w-16 h-16 rounded-[20px] flex items-center justify-center mx-auto mb-5"
-              style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.12), rgba(212,175,55,0.04))' }}>
+              style={{ background: 'linear-gradient(135deg, rgba(93,173,226,0.15), rgba(93,173,226,0.05))' }}>
               <GoldMicIcon />
             </div>
             <span className="font-bold text-[17px] block mb-1.5"
-              style={{ color: '#FFF8E7' }}>Conversation</span>
+              style={{ color: '#ecf0f1' }}>Conversation</span>
             <span className="text-[12px] leading-snug block"
-              style={{ color: 'rgba(255,248,231,0.35)' }}>
+              style={{ color: 'rgba(236,240,241,0.4)' }}>
               Parle et écoute Samir
             </span>
           </button>
