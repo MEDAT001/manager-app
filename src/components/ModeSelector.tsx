@@ -8,15 +8,15 @@ function GoldChatIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-        stroke="url(#gold1)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <circle cx="12" cy="11.5" r="1" fill="url(#gold1)"/>
-      <circle cx="8" cy="11.5" r="1" fill="url(#gold1)"/>
-      <circle cx="16" cy="11.5" r="1" fill="url(#gold1)"/>
+        stroke="url(#gold1)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="12" cy="11.5" r="1.2" fill="url(#gold1)"/>
+      <circle cx="8" cy="11.5" r="1.2" fill="url(#gold1)"/>
+      <circle cx="16" cy="11.5" r="1.2" fill="url(#gold1)"/>
       <defs>
         <linearGradient id="gold1" x1="3" y1="3" x2="21" y2="21">
-          <stop stopColor="#C9A96E"/>
-          <stop offset="0.5" stopColor="#E8D5A3"/>
-          <stop offset="1" stopColor="#A67C52"/>
+          <stop stopColor="#D4B97A"/>
+          <stop offset="0.5" stopColor="#F0DEB0"/>
+          <stop offset="1" stopColor="#BF9B5A"/>
         </linearGradient>
       </defs>
     </svg>
@@ -26,15 +26,15 @@ function GoldChatIcon() {
 function GoldMicIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="9" y="2" width="6" height="11" rx="3" stroke="url(#gold2)" strokeWidth="1.5"/>
-      <path d="M5 10a7 7 0 0 0 14 0" stroke="url(#gold2)" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="12" y1="17" x2="12" y2="21" stroke="url(#gold2)" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="9" y1="21" x2="15" y2="21" stroke="url(#gold2)" strokeWidth="1.5" strokeLinecap="round"/>
+      <rect x="9" y="2" width="6" height="11" rx="3" stroke="url(#gold2)" strokeWidth="2"/>
+      <path d="M5 10a7 7 0 0 0 14 0" stroke="url(#gold2)" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="12" y1="17" x2="12" y2="21" stroke="url(#gold2)" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="9" y1="21" x2="15" y2="21" stroke="url(#gold2)" strokeWidth="2" strokeLinecap="round"/>
       <defs>
         <linearGradient id="gold2" x1="5" y1="2" x2="19" y2="21">
-          <stop stopColor="#C9A96E"/>
-          <stop offset="0.5" stopColor="#E8D5A3"/>
-          <stop offset="1" stopColor="#A67C52"/>
+          <stop stopColor="#D4B97A"/>
+          <stop offset="0.5" stopColor="#F0DEB0"/>
+          <stop offset="1" stopColor="#BF9B5A"/>
         </linearGradient>
       </defs>
     </svg>
