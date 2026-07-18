@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent } from 'react'
+import { useState, useRef, useEffect, type KeyboardEvent } from 'react'
 import { VoiceButton } from './VoiceButton'
 import { LIMITS } from '../lib/constants'
 
@@ -29,11 +29,17 @@ export function ChatInput({
   onVoiceToggle,
 }: Props) {
   const [text, setText] = useState('')
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [])
 
   const handleSend = () => {
     if (text.trim() && !isLoading) {
       onSend(text)
       setText('')
+      setTimeout(() => inputRef.current?.focus(), 10)
     }
   }
 
@@ -68,6 +74,7 @@ export function ChatInput({
 
         <div className="flex-1 relative">
           <textarea
+            ref={inputRef}
             value={text}
             onChange={(e) => setText(e.target.value.slice(0, LIMITS.MAX_MESSAGE_LENGTH))}
             onKeyDown={handleKeyDown}
