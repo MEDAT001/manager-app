@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { RefreshCw, MoreHorizontal } from 'lucide-react'
 import { ChatWindow } from './components/ChatWindow'
 import { ChatInput } from './components/ChatInput'
@@ -7,7 +7,6 @@ import { ConversationMode } from './components/ConversationMode'
 import { useChat } from './hooks/useChat'
 import { useVoiceRecognition } from './hooks/useVoiceRecognition'
 import { useVoiceMode } from './hooks/useVoiceMode'
-import { isCurrentlySpeaking } from './services/tts'
 
 type AppMode = 'select' | 'chat' | 'conversation'
 
@@ -15,72 +14,50 @@ export default function App() {
   const [mode, setMode] = useState<AppMode>('select')
   const voiceMode = useVoiceMode()
 
-  const speakStreamRef = useRef(voiceMode.speakTextStream)
-  speakStreamRef.current = voiceMode.speakTextStream
-
-  const speakRef = useRef(voiceMode.speakText)
-  speakRef.current = voiceMode.speakText
+  const speakStreamRef = useCallback((sentence: string) => {
+    voiceMode.speakTextStream(sentence)
+  }, [voiceMode])
 
   const [lastReply, setLastReply] = useState('')
   const [isThinking, setIsThinking] = useState(false)
-  const autoRestartRef = useRef(false)
-
-  const startListeningRef = useRef<() => void>(() => {})
-  const stopListeningRef = useRef<() => void>(() => {})
 
   const chat = useChat({
     onSentence: mode === 'conversation' && voiceMode.isVoiceMode
       ? (sentence) => {
-          speakStreamRef.current(sentence)
+          speakStreamRef(sentence)
         }
       : undefined,
     onReply: mode === 'conversation' && voiceMode.isVoiceMode
-      ? async (fullText) => {
-          stopListeningRef.current()
+      ? (fullText) => {
+          // Just display the reply, mic stays OFF until user clicks
           setLastReply(fullText)
           setIsThinking(false)
-          // Wait for TTS to finish before restarting mic
-          await new Promise<void>((resolve) => {
-            let checks = 0
-            const interval = setInterval(() => {
-              checks++
-              if (!isCurrentlySpeaking() || checks > 40) {
-                clearInterval(interval)
-                resolve()
-              }
-            }, 250)
-          })
-          if (autoRestartRef.current) {
-            startListeningRef.current()
-          }
         }
       : undefined,
   })
 
-  const sendMessageRef = useRef(chat.sendMessage)
-  sendMessageRef.current = chat.sendMessage
-
-  const handleVoiceResult = useCallback((text: string) => {
-    autoRestartRef.current = true
+  const sendMessageRef = useCallback((text: string) => {
     setIsThinking(false)
     setLastReply('')
-    sendMessageRef.current(text)
-  }, [])
+    chat.sendMessage(text)
+  }, [chat])
+
+  const handleVoiceResult = useCallback((text: string) => {
+    setIsThinking(true)
+    setLastReply('')
+    sendMessageRef(text)
+  }, [sendMessageRef])
 
   const voice = useVoiceRecognition(handleVoiceResult)
-  startListeningRef.current = voice.startListening
-  stopListeningRef.current = voice.stopListening
 
   const handleSelectMode = useCallback((selected: 'chat' | 'conversation') => {
     setMode(selected)
-    autoRestartRef.current = false
     if (selected === 'conversation') {
       voiceMode.enable()
     }
   }, [voiceMode])
 
   const handleMicToggle = useCallback(() => {
-    autoRestartRef.current = false
     if (voice.isListening) {
       voice.stopListening()
     } else {
@@ -90,7 +67,6 @@ export default function App() {
   }, [voice])
 
   const handleBackToSelect = useCallback(() => {
-    autoRestartRef.current = false
     chat.clearMessages()
     voiceMode.disable()
     if (voice.isListening) voice.stopListening()
@@ -145,7 +121,6 @@ export default function App() {
           {chat.messages.length > 0 && (
             <button
               onClick={() => {
-                autoRestartRef.current = false
                 chat.clearMessages()
                 if (voice.isListening) voice.stopListening()
               }}
