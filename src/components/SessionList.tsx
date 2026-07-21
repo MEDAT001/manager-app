@@ -9,6 +9,8 @@ interface Props {
   onNewVoice: () => void
 }
 
+const MAX_VISIBLE_SESSIONS = 3
+
 function formatDate(timestamp: number): string {
   const date = new Date(timestamp)
   const now = new Date()
@@ -23,9 +25,48 @@ function formatDate(timestamp: number): string {
   return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
 }
 
-export function SessionList({ sessions, onSelect, onDelete, onNewChat, onNewVoice }: Props) {
+function GoldChatIcon() {
   return (
-    <div className="h-full flex flex-col relative overflow-hidden"
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+        stroke="url(#gold1)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="12" cy="11.5" r="1.2" fill="url(#gold1)"/>
+      <circle cx="8" cy="11.5" r="1.2" fill="url(#gold1)"/>
+      <circle cx="16" cy="11.5" r="1.2" fill="url(#gold1)"/>
+      <defs>
+        <linearGradient id="gold1" x1="3" y1="3" x2="21" y2="21">
+          <stop stopColor="#D4B97A"/>
+          <stop offset="0.5" stopColor="#F0DEB0"/>
+          <stop offset="1" stopColor="#BF9B5A"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  )
+}
+
+function GoldMicIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="9" y="2" width="6" height="11" rx="3" stroke="url(#gold2)" strokeWidth="2"/>
+      <path d="M5 10a7 7 0 0 0 14 0" stroke="url(#gold2)" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="12" y1="17" x2="12" y2="21" stroke="url(#gold2)" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="9" y1="21" x2="15" y2="21" stroke="url(#gold2)" strokeWidth="2" strokeLinecap="round"/>
+      <defs>
+        <linearGradient id="gold2" x1="5" y1="2" x2="19" y2="21">
+          <stop stopColor="#D4B97A"/>
+          <stop offset="0.5" stopColor="#F0DEB0"/>
+          <stop offset="1" stopColor="#BF9B5A"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  )
+}
+
+export function SessionList({ sessions, onSelect, onDelete, onNewChat, onNewVoice }: Props) {
+  const recentSessions = sessions.slice(0, MAX_VISIBLE_SESSIONS)
+
+  return (
+    <div className="h-full flex flex-col items-center justify-center px-6 relative overflow-hidden"
       style={{ background: '#0C0A09' }}>
 
       <div className="absolute w-[600px] h-[600px] rounded-full opacity-[0.035] blur-[150px] top-[-200px] left-[-150px]"
@@ -36,158 +77,157 @@ export function SessionList({ sessions, onSelect, onDelete, onNewChat, onNewVoic
       <div className="absolute inset-0 opacity-[0.015]"
         style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(201,169,110,0.5) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
 
-      {/* Header */}
-      <header className="flex items-center justify-between px-5 py-4 relative z-10"
-        style={{ borderBottom: '1px solid rgba(212,175,55,0.06)' }}>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-[14px] overflow-hidden"
-            style={{ boxShadow: '0 4px 16px rgba(212,175,55,0.15)' }}>
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-24 opacity-20"
+        style={{ background: 'linear-gradient(to bottom, transparent, #C9A96E, transparent)' }} />
+
+      <div className="relative z-10 text-center w-full max-w-[420px]" style={{ animation: 'fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+        {/* Logo */}
+        <div className="relative w-[100px] h-[100px] mx-auto mb-10">
+          <div className="absolute inset-[-2px] rounded-[32px] opacity-40"
+            style={{ background: 'linear-gradient(135deg, #C9A96E, #E8D5A3, #A67C52, #C9A96E)' }}>
+            <div className="w-full h-full rounded-[30px]" style={{ background: '#0C0A09' }} />
+          </div>
+          <div className="relative w-full h-full rounded-[30px] overflow-hidden"
+            style={{ boxShadow: '0 20px 60px rgba(201,169,110,0.15)' }}>
             <img src="/logo.png" alt="Coach" className="w-full h-full object-cover" />
           </div>
-          <div>
-            <span className="font-bold text-[15px] tracking-tight block leading-tight"
-              style={{ color: '#FFF8E7' }}>
-              Coach
-            </span>
-            <span className="text-[11px] font-semibold flex items-center gap-1.5"
-              style={{ color: '#C9A84C' }}>
-              <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: '#C9A84C' }} />
-              En ligne
-            </span>
-          </div>
         </div>
-      </header>
 
-      {/* New conversation buttons */}
-      <div className="px-5 pt-5 pb-3 relative z-10">
-        <div className="flex gap-3">
+        {/* Divider */}
+        <div className="flex items-center gap-4 mb-8 px-8">
+          <div className="flex-1 h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(212,185,122,0.45))' }} />
+          <span className="text-[9px] font-semibold tracking-[0.3em] uppercase" style={{ color: '#D4B97A', fontFamily: "'Cormorant Garamond', serif" }}>Choisir</span>
+          <div className="flex-1 h-[1px]" style={{ background: 'linear-gradient(90deg, rgba(212,185,122,0.45), transparent)' }} />
+        </div>
+
+        {/* 2 buttons */}
+        <div className="flex gap-4 w-full px-4 mb-8">
           <button
             onClick={onNewChat}
-            className="flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-2xl cursor-pointer transition-all duration-500 hover:-translate-y-0.5"
+            className="flex-1 p-7 rounded-[20px] text-center cursor-pointer transition-all duration-500 hover:-translate-y-1"
             style={{
-              border: '1px solid rgba(201,169,110,0.15)',
-              background: 'linear-gradient(135deg, rgba(201,169,110,0.08), rgba(201,169,110,0.03))',
+              border: '1px solid rgba(201,169,110,0.08)',
+              background: 'rgba(201,169,110,0.02)',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(201,169,110,0.3)'
-              e.currentTarget.style.boxShadow = '0 12px 40px rgba(201,169,110,0.1)'
+              e.currentTarget.style.borderColor = 'rgba(201,169,110,0.25)'
+              e.currentTarget.style.background = 'rgba(201,169,110,0.06)'
+              e.currentTarget.style.boxShadow = '0 20px 50px rgba(201,169,110,0.08)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(201,169,110,0.15)'
+              e.currentTarget.style.borderColor = 'rgba(201,169,110,0.08)'
+              e.currentTarget.style.background = 'rgba(201,169,110,0.02)'
               e.currentTarget.style.boxShadow = 'none'
             }}
           >
-            <MessageCircle size={18} style={{ color: '#D4B97A' }} />
-            <span className="text-[13px] font-semibold" style={{ color: '#F5F0E8' }}>
-              Nouveau texte
+            <div className="w-14 h-14 rounded-[16px] flex items-center justify-center mx-auto mb-4"
+              style={{ background: 'rgba(201,169,110,0.06)', border: '1px solid rgba(201,169,110,0.08)' }}>
+              <GoldChatIcon />
+            </div>
+            <span className="block mb-1" style={{ color: '#F5F0E8', fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: '17px', letterSpacing: '-0.01em' }}>Discuter</span>
+            <span className="text-[11px] leading-snug block" style={{ color: 'rgba(245,240,232,0.3)', fontFamily: "'Cormorant Garamond', serif", fontWeight: 500, fontSize: '12px' }}>
+              Écris et lis les réponses
             </span>
           </button>
 
           <button
             onClick={onNewVoice}
-            className="flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-2xl cursor-pointer transition-all duration-500 hover:-translate-y-0.5"
+            className="flex-1 p-7 rounded-[20px] text-center cursor-pointer transition-all duration-500 hover:-translate-y-1"
             style={{
-              border: '1px solid rgba(201,169,110,0.15)',
-              background: 'linear-gradient(135deg, rgba(201,169,110,0.08), rgba(201,169,110,0.03))',
+              border: '1px solid rgba(201,169,110,0.08)',
+              background: 'rgba(201,169,110,0.02)',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(201,169,110,0.3)'
-              e.currentTarget.style.boxShadow = '0 12px 40px rgba(201,169,110,0.1)'
+              e.currentTarget.style.borderColor = 'rgba(201,169,110,0.25)'
+              e.currentTarget.style.background = 'rgba(201,169,110,0.06)'
+              e.currentTarget.style.boxShadow = '0 20px 50px rgba(201,169,110,0.08)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(201,169,110,0.15)'
+              e.currentTarget.style.borderColor = 'rgba(201,169,110,0.08)'
+              e.currentTarget.style.background = 'rgba(201,169,110,0.02)'
               e.currentTarget.style.boxShadow = 'none'
             }}
           >
-            <Mic size={18} style={{ color: '#D4B97A' }} />
-            <span className="text-[13px] font-semibold" style={{ color: '#F5F0E8' }}>
-              Nouvel appel
+            <div className="w-14 h-14 rounded-[16px] flex items-center justify-center mx-auto mb-4"
+              style={{ background: 'rgba(201,169,110,0.06)', border: '1px solid rgba(201,169,110,0.08)' }}>
+              <GoldMicIcon />
+            </div>
+            <span className="block mb-1" style={{ color: '#F5F0E8', fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: '17px', letterSpacing: '-0.01em' }}>Appel vocal</span>
+            <span className="text-[11px] leading-snug block" style={{ color: 'rgba(245,240,232,0.3)', fontFamily: "'Cormorant Garamond', serif", fontWeight: 500, fontSize: '12px' }}>
+              Parle et écoute le coach
             </span>
           </button>
         </div>
-      </div>
 
-      {/* Sessions list */}
-      <div className="flex-1 overflow-y-auto px-5 pb-6 relative z-10">
-        {sessions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full opacity-40">
-            <MessageCircle size={40} style={{ color: '#D4B97A' }} className="mb-4 opacity-30" />
-            <p className="text-sm text-center" style={{ color: 'rgba(245,240,232,0.5)' }}>
-              Aucune conversation pour l'instant.
-            </p>
-            <p className="text-xs mt-1 text-center" style={{ color: 'rgba(245,240,232,0.3)' }}>
-              Commence une nouvelle session ci-dessus.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {sessions.map((session) => (
-              <div
-                key={session.id}
-                className="group flex items-center gap-3 p-3.5 rounded-2xl cursor-pointer transition-all duration-300"
-                style={{
-                  border: '1px solid rgba(201,169,110,0.05)',
-                  background: 'rgba(201,169,110,0.02)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(201,169,110,0.15)'
-                  e.currentTarget.style.background = 'rgba(201,169,110,0.05)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(201,169,110,0.05)'
-                  e.currentTarget.style.background = 'rgba(201,169,110,0.02)'
-                }}
-              >
+        {/* Recent sessions (max 3) */}
+        {recentSessions.length > 0 && (
+          <div className="w-full px-4 mb-6">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="flex-1 h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(212,185,122,0.2))' }} />
+              <span className="text-[8px] font-semibold tracking-[0.25em] uppercase" style={{ color: 'rgba(212,185,122,0.4)', fontFamily: "'Cormorant Garamond', serif" }}>Récent</span>
+              <div className="flex-1 h-[1px]" style={{ background: 'linear-gradient(90deg, rgba(212,185,122,0.2), transparent)' }} />
+            </div>
+            <div className="space-y-1.5">
+              {recentSessions.map((session) => (
                 <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'rgba(201,169,110,0.06)', border: '1px solid rgba(201,169,110,0.08)' }}
-                >
-                  {session.mode === 'conversation' ? (
-                    <Mic size={14} style={{ color: '#D4B97A' }} />
-                  ) : (
-                    <MessageCircle size={14} style={{ color: '#D4B97A' }} />
-                  )}
-                </div>
-
-                <button
-                  onClick={() => onSelect(session)}
-                  className="flex-1 text-left min-w-0"
-                >
-                  <span className="block text-[13px] font-semibold truncate"
-                    style={{ color: '#F5F0E8' }}>
-                    {session.title}
-                  </span>
-                  <span className="block text-[11px] mt-0.5"
-                    style={{ color: 'rgba(245,240,232,0.3)' }}>
-                    {formatDate(session.updatedAt)} · {session.messages.length} messages
-                  </span>
-                </button>
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onDelete(session.id)
+                  key={session.id}
+                  className="group flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-300"
+                  style={{
+                    border: '1px solid rgba(201,169,110,0.05)',
+                    background: 'rgba(201,169,110,0.02)',
                   }}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-500/10"
-                  style={{ color: 'rgba(255,87,87,0.5)' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = '#FF5757' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,87,87,0.5)' }}
-                  aria-label="Supprimer"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(201,169,110,0.15)'
+                    e.currentTarget.style.background = 'rgba(201,169,110,0.05)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(201,169,110,0.05)'
+                    e.currentTarget.style.background = 'rgba(201,169,110,0.02)'
+                  }}
                 >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            ))}
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'rgba(201,169,110,0.06)', border: '1px solid rgba(201,169,110,0.08)' }}>
+                    {session.mode === 'conversation' ? (
+                      <Mic size={13} style={{ color: '#D4B97A' }} />
+                    ) : (
+                      <MessageCircle size={13} style={{ color: '#D4B97A' }} />
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => onSelect(session)}
+                    className="flex-1 text-left min-w-0"
+                  >
+                    <span className="block text-[12px] font-semibold truncate"
+                      style={{ color: '#F5F0E8' }}>
+                      {session.title}
+                    </span>
+                    <span className="block text-[10px] mt-0.5"
+                      style={{ color: 'rgba(245,240,232,0.25)' }}>
+                      {formatDate(session.updatedAt)}
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onDelete(session.id)
+                    }}
+                    className="w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-500/10"
+                    style={{ color: 'rgba(255,87,87,0.4)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = '#FF5757' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,87,87,0.4)' }}
+                    aria-label="Supprimer"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
-      </div>
 
-      {/* Footer */}
-      <div className="px-5 pb-4 relative z-10">
-        <span className="text-[10px] font-semibold tracking-[0.25em] uppercase block text-center"
-          style={{ color: '#D4B97A', fontFamily: "'Cormorant Garamond', serif", opacity: 0.5 }}>
-          Version beta
-        </span>
+        <span className="text-[10px] font-semibold tracking-[0.25em] uppercase mt-4 block" style={{ color: '#D4B97A', fontFamily: "'Cormorant Garamond', serif", opacity: 0.6 }}>Version beta</span>
       </div>
     </div>
   )
