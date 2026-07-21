@@ -1,20 +1,23 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import type { Message } from '../lib/types'
 import { sendMessage, sendMessageStream } from '../services/openrouter'
 import { API } from '../lib/constants'
 import { logger } from '../lib/logger'
+import { updateSessionMessages, addMessage } from '../lib/storage'
 
 function uid(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7)
 }
 
 interface UseChatOptions {
+  sessionId?: string | null
+  initialMessages?: Message[]
   onReply?: (text: string) => void
   onSentence?: (sentence: string) => void
 }
 
 export function useChat(options?: UseChatOptions) {
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<Message[]>(options?.initialMessages || [])
   const [isLoading, setIsLoading] = useState(false)
   const [isTyping, setIsTyping] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -22,10 +25,26 @@ export function useChat(options?: UseChatOptions) {
   const abortRef = useRef(false)
   const onReplyRef = useRef(options?.onReply)
   const onSentenceRef = useRef(options?.onSentence)
+  const sessionIdRef = useRef(options?.sessionId)
 
   messagesRef.current = messages
   onReplyRef.current = options?.onReply
   onSentenceRef.current = options?.onSentence
+  sessionIdRef.current = options?.sessionId
+
+  // Sync initial messages when session changes
+  useEffect(() => {
+    if (options?.initialMessages) {
+      setMessages(options.initialMessages)
+    }
+  }, [options?.sessionId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Save messages to localStorage after each update
+  useEffect(() => {
+    if (sessionIdRef.current && messages.length > 0) {
+      updateSessionMessages(sessionIdRef.current, messages)
+    }
+  }, [messages])
 
   const sendMessageToAPI = useCallback(async (content: string) => {
     const trimmed = content.trim()
@@ -41,7 +60,14 @@ export function useChat(options?: UseChatOptions) {
       timestamp: Date.now(),
     }
 
-    setMessages((prev) => [...prev, userMsg])
+    setMessages((prev) => {
+      const next = [...prev, userMsg]
+      // Save user message immediately
+      if (sessionIdRef.current) {
+        addMessage(sessionIdRef.current, userMsg)
+      }
+      return next
+    })
     setIsLoading(true)
 
     const assistantMsg: Message = {
@@ -59,27 +85,35 @@ export function useChat(options?: UseChatOptions) {
       // Streaming mode: yield sentences as they arrive
       if (onSentenceRef.current) {
         let fullText = ''
-        let sentenceBuffer = ''
         setIsTyping(true)
 
         for await (const sentence of sendMessageStream(allMessages)) {
           if (abortRef.current) break
 
           fullText += sentence + ' '
-          sentenceBuffer += sentence + ' '
 
-          // Update message with revealed text
           setMessages((prev) =>
             prev.map((m) =>
               m.id === assistantMsg.id ? { ...m, content: fullText.trim() } : m,
             ),
           )
 
-          // Send sentence to TTS immediately
           onSentenceRef.current(sentence)
         }
 
         setIsTyping(false)
+
+        // Finalize assistant message
+        setMessages((prev) => {
+          const updated = prev.map((m) =>
+            m.id === assistantMsg.id ? { ...m, content: fullText.trim() } : m,
+          )
+          // Save final assistant message
+          if (sessionIdRef.current && fullText.trim()) {
+            addMessage(sessionIdRef.current, { ...assistantMsg, content: fullText.trim() })
+          }
+          return updated
+        })
 
         if (!abortRef.current && onReplyRef.current) {
           onReplyRef.current(fullText.trim())
@@ -106,6 +140,18 @@ export function useChat(options?: UseChatOptions) {
         }
 
         setIsTyping(false)
+
+        // Finalize assistant message
+        setMessages((prev) => {
+          const updated = prev.map((m) =>
+            m.id === assistantMsg.id ? { ...m, content: fullText } : m,
+          )
+          // Save final assistant message
+          if (sessionIdRef.current && fullText) {
+            addMessage(sessionIdRef.current, { ...assistantMsg, content: fullText })
+          }
+          return updated
+        })
 
         if (!abortRef.current && onReplyRef.current) {
           onReplyRef.current(fullText)
