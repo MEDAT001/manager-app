@@ -213,7 +213,7 @@ export function SessionList({ sessions, onSelect, onDelete, onNewChat, onNewVoic
                       e.stopPropagation()
                       onDelete(session.id)
                     }}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-500/10"
+                    className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-300 hover:bg-red-500/10"
                     style={{ color: 'rgba(255,87,87,0.4)' }}
                     onMouseEnter={(e) => { e.currentTarget.style.color = '#FF5757' }}
                     onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,87,87,0.4)' }}
