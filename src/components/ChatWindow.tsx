@@ -24,16 +24,12 @@ export function ChatWindow({ messages, isTyping }: Props) {
           </div>
           <div className="relative w-full h-full rounded-[28px] overflow-hidden"
             style={{ boxShadow: '0 16px 48px rgba(212,175,55,0.15)' }}>
-            <img src="/logo.png" alt="Samir" className="w-full h-full object-cover" />
+            <img src="/logo.png" alt="Coach" className="w-full h-full object-cover" />
           </div>
         </div>
-        <h2 className="text-xl font-bold mb-2 tracking-tight" style={{ color: '#FFF8E7' }}>
-          Salut, je suis Samir.
+        <h2 className="text-lg font-bold mb-2 tracking-tight" style={{ color: '#FFF8E7' }}>
+          Bonjour. Quel est l'objectif précis de notre séance aujourd'hui ?
         </h2>
-        <p className="text-sm max-w-[280px] leading-relaxed font-medium"
-          style={{ color: 'rgba(255,248,231,0.35)' }}>
-          Ton coach personnel. Dis-moi ce qui t'amène et on avance ensemble.
-        </p>
       </div>
     )
   }
